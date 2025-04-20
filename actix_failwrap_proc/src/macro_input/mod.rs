@@ -1,3 +1,3 @@
 
-pub mod error_response;
+pub mod response_error;
 pub mod proof_route;
