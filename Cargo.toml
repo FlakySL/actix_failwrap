@@ -1,0 +1,3 @@
+[workspace]
+resolver = "2"
+members = ["actix_failwrap", "actix_failwrap_proc"]
