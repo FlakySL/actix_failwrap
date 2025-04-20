@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
 use syn::{parse::{Parse, ParseStream}, parse2, Data, DeriveInput, Error as SynError, Fields, Ident, LitInt, MetaNameValue, Result as SynResult, Token, Variant};
@@ -47,14 +45,15 @@ pub enum Status {
 }
 
 pub enum ErrorVariant {
-    Unit(Option<Status>),
-Tuple(Option<Status>),
-    Struct(Option<Status>)
+    Unit(Ident),
+    Tuple(Ident),
+    Struct(Ident)
 }
 
 pub struct MacroArgs {
+    name: Ident,
     macro_config: Option<Config>,
-    branches: HashMap<Ident, ErrorVariant>
+    branches: Vec<(ErrorVariant, Option<Status>)>
 }
 
 impl Parse for Config {
@@ -125,33 +124,24 @@ impl TryFrom<Variant> for ErrorVariant {
     type Error = SynError;
 
     fn try_from(value: Variant) -> Result<Self, Self::Error> {
-        let mut status = None;
-
-        for attr in value.attrs {
-            if attr.path().is_ident("status") {
-                if status.is_some() {
-                    return Err(
-                        MacroError::DuplicateAttr
-                            .to_syn_error(attr)
-                    );
-                }
-
-                status = Some(attr.parse_args::<Status>()?);
-            }
-        }
+        let variant_name = value.ident;
 
         Ok(match value.fields {
-            Fields::Unit => Self::Unit(status),
-            Fields::Unnamed(..) => Self::Tuple(status),
-            Fields::Named(..) => Self::Struct(status)
+            Fields::Unit => Self::Unit(variant_name),
+            Fields::Unnamed(..) => Self::Tuple(variant_name),
+            Fields::Named(..) => Self::Struct(variant_name)
         })
     }
 }
 
-impl TryFrom<DeriveInput> for MacroArgs {
-    type Error = SynError;
+impl Parse for MacroArgs {
+    fn parse(value: ParseStream) -> SynResult<Self> {
+        let value = value.parse::<DeriveInput>()?;
 
-    fn try_from(value: DeriveInput) -> Result<Self, Self::Error> {
+        let enum_name = value
+            .ident
+            .clone();
+
         let mut config = None;
 
         for attr in &value.attrs {
@@ -178,9 +168,40 @@ impl TryFrom<DeriveInput> for MacroArgs {
         let variants = data
             .variants
             .into_iter()
-            .map(|variant| Ok((variant.ident.clone(), variant.try_into()?)))
-            .collect::<Result<HashMap<Ident, ErrorVariant>, SynError>>()?;
+            .map(|variant| {
+                let mut status = None;
 
-        Ok(Self { macro_config: config, branches: variants })
+                for attr in &variant.attrs {
+                    if attr.path().is_ident("status") {
+                        if status.is_some() {
+                            return Err(
+                                MacroError::DuplicateAttr
+                                    .to_syn_error(attr)
+                            );
+                        }
+
+                        status = Some(attr.parse_args::<Status>()?);
+                    }
+                }
+
+                Ok((variant.try_into()?, status))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(Self { macro_config: config, branches: variants, name: enum_name })
+    }
+}
+
+impl MacroArgs {
+    pub fn macro_config(&self) -> Option<&Config> {
+        self.macro_config.as_ref()
+    }
+
+    pub fn branches(&self) -> &Vec<(ErrorVariant, Option<Status>)> {
+        &self.branches
+    }
+
+    pub fn name(&self) -> &Ident {
+        &self.name
     }
 }
