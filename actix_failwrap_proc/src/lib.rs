@@ -8,7 +8,7 @@ mod macro_generation;
 mod macro_input;
 mod misc;
 
-#[proc_macro_derive(HelperAttr, attributes(failwrap, response))]
+#[proc_macro_derive(ResponseError, attributes(failwrap, response))]
 pub fn response_error(attr: TokenStream) -> TokenStream {
     response_error_macro(parse_macro_input!(attr as ResponseErrorMacroArgs)).into()
 }
