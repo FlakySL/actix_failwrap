@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::ToTokens;
+use quote::{quote, ToTokens, TokenStreamExt};
 use syn::{parse::{Parse, ParseStream}, parse2, Data, DeriveInput, Error as SynError, Fields, Ident, LitInt, MetaNameValue, Result as SynResult, Token, Variant};
 use thiserror::Error;
 
@@ -31,7 +31,10 @@ enum MacroError {
     InvalidValue(Vec<String>),
 
     #[error("This attribute can only be used in enums")]
-    InvalidExpectedEnum
+    InvalidExpectedEnum,
+
+    #[error("This HTTP status code is not supported")]
+    InvalidHttpCode
 }
 
 pub struct Config {
@@ -39,6 +42,7 @@ pub struct Config {
     default_status: Option<Status>
 }
 
+#[derive(Clone)]
 pub enum Status {
     Code(u16),
     Ref(Ident)
@@ -105,10 +109,37 @@ impl Parse for Config {
     }
 }
 
+impl Config {
+    pub fn transform(&self) -> Option<&Ident> {
+        self.transform.as_ref()
+    }
+
+    pub fn default_status(&self) -> Option<&Status> {
+        self.default_status.as_ref()
+    }
+}
+
 impl Parse for Status {
     fn parse(input: ParseStream) -> SynResult<Self> {
         if input.peek(LitInt) {
-            Ok(Self::Code(input.parse::<LitInt>()?.base10_parse()?))
+            let valid_codes: Vec<u16> = vec![
+                100, 101, 102,
+                200, 201, 202, 203, 204, 205, 206, 207, 208, 226,
+                300, 301, 302, 303, 304, 305, 307, 308,
+                400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412,
+                     413, 414, 415, 416, 417, 418, 421, 422, 423, 424, 426, 428,
+                     429, 431, 451,
+                500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511
+            ];
+
+            let code = input.parse::<LitInt>()?;
+            let parsed_code = code.base10_parse()?;
+
+            if valid_codes.contains(&parsed_code) {
+                Ok(Self::Code(parsed_code))
+            } else {
+                Err(MacroError::InvalidHttpCode.to_syn_error(code))
+            }
         } else if input.peek(Ident) {
             Ok(Self::Ref(input.parse::<Ident>()?))
         } else {
@@ -116,6 +147,24 @@ impl Parse for Status {
                 MacroError::InvalidValue(vec!["u16 literal".into(), "status ident".into()])
                     .to_syn_error(input.parse::<TokenStream2>()?)
             )
+        }
+    }
+}
+
+impl ToTokens for Status {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        match self {
+            Status::Code(code) => tokens.append_all(quote! {
+                actix_web::HttpResponse::build(
+                    actix_web::http::StatusCode::from_u16(#code)
+                        // We validate the code in compile time.
+                        .unwrap_or(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR)
+                )
+            }),
+
+            Status::Ref(ident) => tokens.append_all(quote! {
+                actix_web::HttpResponse::#ident()
+            }),
         }
     }
 }
@@ -131,6 +180,16 @@ impl TryFrom<Variant> for ErrorVariant {
             Fields::Unnamed(..) => Self::Tuple(variant_name),
             Fields::Named(..) => Self::Struct(variant_name)
         })
+    }
+}
+
+impl ErrorVariant {
+    pub fn to_branch_tokens(&self, key: impl ToTokens, inner: impl ToTokens) -> TokenStream2 {
+        match self {
+            ErrorVariant::Unit(ident) => quote! { #key::#ident },
+            ErrorVariant::Tuple(ident) => quote! { #key::#ident(#inner) },
+            ErrorVariant::Struct(ident) => quote! { #key::#ident{#inner} },
+        }
     }
 }
 
