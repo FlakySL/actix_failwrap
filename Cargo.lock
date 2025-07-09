@@ -191,6 +191,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "actix_failwrap_proc",
+ "thiserror",
 ]
 
 [[package]]

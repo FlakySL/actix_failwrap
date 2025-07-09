@@ -6,3 +6,6 @@ edition = "2024"
 [dependencies]
 actix-web = "4.10.2"
 actix_failwrap_proc = { path = "../actix_failwrap_proc/" }
+
+[dev-dependencies]
+thiserror = "2.0.12"
