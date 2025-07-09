@@ -49,21 +49,21 @@ pub fn response_error_macro(args: MacroArgs) -> TokenStream2 {
             );
 
             quote! {
-                #branch_tokens => actix_web::error::#error_ident(self.to_string())
+                #branch_tokens => ::actix_web::error::#error_ident(self.to_string())
             }
         });
 
     quote! {
-        impl ::core::convert::Into<actix_web::HttpResponse> for #enum_name {
-            fn into(self) -> actix_web::HttpResponse {
+        impl ::std::convert::Into<actix_web::HttpResponse> for #enum_name {
+            fn into(self) -> ::actix_web::HttpResponse {
                 match self {
                     #(#into_response_arms),*
                 }
             }
         }
 
-        impl ::core::convert::Into<actix_web::Error> for #enum_name {
-            fn into(self) -> actix_web::Error {
+        impl ::std::convert::Into<actix_web::Error> for #enum_name {
+            fn into(self) -> ::actix_web::Error {
                 match self {
                     #(#into_error_arms),*
                 }
