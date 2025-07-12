@@ -5,8 +5,9 @@ use syn::parse::{Parse, ParseStream};
 use crate::helpers::unique_attr::get_single_attr;
 
 pub struct ErrorResponse {
+    enum_name: Ident,
     default_status_code: Ident, // by default 500. Dynamic
-    transformer: Option<Ident>, // an onscope reference Fn(HttpStatusCode, &str)
+    transform_response: Option<Ident>, // an onscope reference Fn(HttpStatusCode, &str)
     variants: Vec<ErrorResponseVariant>
 }
 
@@ -22,13 +23,18 @@ pub enum StatusCode {
 
 impl ErrorResponse {
     #[inline(always)]
+    pub fn enum_name(&self) -> &Ident {
+        &self.enum_name
+    }
+
+    #[inline(always)]
     pub fn default_status_code(&self) -> &Ident {
         &self.default_status_code
     }
 
     #[inline(always)]
-    pub fn transformer(&self) -> Option<&Ident> {
-        self.transformer.as_ref()
+    pub fn transform_response(&self) -> Option<&Ident> {
+        self.transform_response.as_ref()
     }
 
     #[inline(always)]
@@ -41,12 +47,14 @@ impl Parse for ErrorResponse {
     fn parse(input: ParseStream) -> SynResult<Self> {
         let input = input.parse::<ItemEnum>()?;
 
+        let enum_name = input.ident;
+
         let default_status_code = get_single_attr(input.attrs.clone(), "default_status_code")?
             .map(|attr| attr.parse_args::<Ident>())
             .transpose()?
             .unwrap_or(format_ident!("InternalServerError"));
 
-        let transformer = get_single_attr(input.attrs, "transformer")?
+        let transform_response = get_single_attr(input.attrs, "transform_response")?
             .map(|attr| attr.parse_args::<Ident>())
             .transpose()?;
 
@@ -60,7 +68,7 @@ impl Parse for ErrorResponse {
             }))
             .collect::<SynResult<Vec<_>>>()?;
 
-        Ok(Self { default_status_code, transformer, variants })
+        Ok(Self { enum_name, default_status_code, transform_response, variants })
     }
 }
 

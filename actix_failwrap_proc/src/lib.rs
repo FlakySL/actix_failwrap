@@ -9,7 +9,7 @@ mod macro_input;
 mod macro_output;
 
 
-#[proc_macro_derive(ErrorResponse, attributes(default_status_code, status_code, transformer))]
+#[proc_macro_derive(ErrorResponse, attributes(default_status_code, status_code, transform_response))]
 pub fn error_response_macro(input: TokenStream) -> TokenStream {
     error_response(parse_macro_input!(input as ErrorResponse))
         .into()
