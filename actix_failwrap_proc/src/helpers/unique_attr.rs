@@ -2,6 +2,7 @@ use proc_macro2::Span;
 use syn::{Attribute, Error as SynError};
 use syn::spanned::Spanned;
 
+
 pub fn get_single_attr<I: IntoIterator<Item = Attribute>>(iter: I, ident: &str) -> Result<Option<Attribute>, SynError> {
     let attributes = iter
     .into_iter()

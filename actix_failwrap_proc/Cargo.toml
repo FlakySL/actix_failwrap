@@ -10,5 +10,6 @@ proc-macro = true
 actix-web = "4.11.0"
 proc-macro2 = "1.0.95"
 quote = "1.0.40"
+strsim = "0.11.1"
 syn = { version = "2.0.100", features = ["full"] }
 thiserror = "2.0.12"

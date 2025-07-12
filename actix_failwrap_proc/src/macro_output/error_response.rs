@@ -4,6 +4,7 @@ use syn::Fields as VariantFields;
 
 use crate::macro_input::error_response::{ErrorResponse, ErrorResponseVariant};
 
+
 fn variant_match_head(variant: &ErrorResponseVariant) -> TokenStream2 {
     let variant_name = &variant.variant().ident;
     let variant_head_type = match variant.variant().fields {
@@ -27,11 +28,15 @@ pub fn error_response(input: ErrorResponse) -> TokenStream2 {
             let variant_head = variant_match_head(variant);
 
             let mut http_response_variant = variant_head.clone();
-            http_response_variant.append_all(quote! { ::actix_web::HttpResponse::#status_code() });
+            http_response_variant.append_all(
+                quote! { ::actix_web::HttpResponse::#status_code() }
+            );
 
             let mut error_variant = variant_head.clone();
             let error_variant_ident = format_ident!("Error{status_code}");
-            error_variant.append_all(quote! { ::actix_web::error::#error_variant_ident(self::to_string()) });
+            error_variant.append_all(
+                quote! { ::actix_web::error::#error_variant_ident(self::to_string()) }
+            );
 
             (http_response_variant, error_variant)
         })
