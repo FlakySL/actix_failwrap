@@ -28,8 +28,15 @@ pub fn error_response(input: ErrorResponse) -> TokenStream2 {
             let variant_head = variant_match_head(variant);
 
             let mut http_response_variant = variant_head.clone();
+            let http_response_tokens = quote! { ::actix_web::HttpResponse::#status_code() };
             http_response_variant.append_all(
-                quote! { ::actix_web::HttpResponse::#status_code() }
+                match input.transform_response() {
+                    Some(transformer_fn) => quote! {
+                        #transformer_fn(#http_response_tokens, self.to_string())
+                    },
+
+                    None => http_response_tokens
+                }
             );
 
             let mut error_variant = variant_head.clone();
