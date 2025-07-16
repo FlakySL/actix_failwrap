@@ -32,7 +32,7 @@ impl ErrorResponse {
     }
 
     #[inline(always)]
-    pub fn transform_response(&self) -> Option<&Ident> {
+    pub const fn transform_response(&self) -> Option<&Ident> {
         self.transform_response.as_ref()
     }
 
@@ -75,7 +75,7 @@ impl Parse for ErrorResponse {
 
 impl ErrorResponseVariant {
     #[inline(always)]
-    pub fn status_code(&self) -> Option<&Ident> {
+    pub const fn status_code(&self) -> Option<&Ident> {
         self.status_code.as_ref()
     }
 

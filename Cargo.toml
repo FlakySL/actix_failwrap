@@ -1,3 +1,15 @@
-[workspace]
-resolver = "2"
-members = ["actix_failwrap", "actix_failwrap_proc"]
+[package]
+name = "actix_failwrap_proc"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+actix-web = "4.11.0"
+proc-macro2 = "1.0.95"
+quote = "1.0.40"
+strsim = "0.11.1"
+syn = { version = "2.0.100", features = ["full"] }
+thiserror = "2.0.12"
