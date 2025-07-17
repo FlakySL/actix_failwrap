@@ -1,6 +1,5 @@
 use strsim::levenshtein;
 
-
 static STATUS_CODES: &[(usize, &str)] = &[
     (400, "BadRequest"),
     (401, "Unauthorized"),

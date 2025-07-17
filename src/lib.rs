@@ -10,18 +10,19 @@ mod helpers;
 mod macro_input;
 mod macro_output;
 
-
-#[proc_macro_derive(ErrorResponse, attributes(default_status_code, status_code, transform_response))]
+#[proc_macro_derive(
+    ErrorResponse,
+    attributes(default_status_code, status_code, transform_response)
+)]
 pub fn error_response_macro(input: TokenStream) -> TokenStream {
-    error_response(parse_macro_input!(input as ErrorResponse))
-        .into()
+    error_response(parse_macro_input!(input as ErrorResponse)).into()
 }
 
 #[proc_macro_attribute]
 pub fn proof_route_macro(meta: TokenStream, body: TokenStream) -> TokenStream {
     proof_route(
         parse_macro_input!(meta as ProofRouteMeta),
-        parse_macro_input!(body as ProofRouteBody)
+        parse_macro_input!(body as ProofRouteBody),
     )
-        .into()
+    .into()
 }

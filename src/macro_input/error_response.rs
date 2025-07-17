@@ -1,21 +1,32 @@
 use quote::format_ident;
-use syn::{Ident, ItemEnum, LitInt, Result as SynResult, Variant as EnumVariant, Error as SynError};
 use syn::parse::{Parse, ParseStream};
+use syn::{
+    Error as SynError,
+    Ident,
+    ItemEnum,
+    LitInt,
+    Result as SynResult,
+    Variant as EnumVariant,
+};
 
-use crate::helpers::status_codes::{allowed_status_pairs, closest_status, code_to_status, is_status_supported};
+use crate::helpers::status_codes::{
+    allowed_status_pairs,
+    closest_status,
+    code_to_status,
+    is_status_supported,
+};
 use crate::helpers::unique_attr::get_single_attr;
-
 
 pub struct ErrorResponse {
     enum_name: Ident,
-    default_status_code: Ident, // by default 500. Dynamic
+    default_status_code: Ident,        // by default 500. Dynamic
     transform_response: Option<Ident>, // an onscope reference Fn(HttpStatusCode, &str)
-    variants: Vec<ErrorResponseVariant>
+    variants: Vec<ErrorResponseVariant>,
 }
 
 pub struct ErrorResponseVariant {
     status_code: Option<Ident>,
-    variant: EnumVariant
+    variant: EnumVariant,
 }
 
 pub struct StatusCode(Ident);
@@ -33,7 +44,8 @@ impl ErrorResponse {
 
     #[inline(always)]
     pub const fn transform_response(&self) -> Option<&Ident> {
-        self.transform_response.as_ref()
+        self.transform_response
+            .as_ref()
     }
 
     #[inline(always)]
@@ -48,35 +60,54 @@ impl Parse for ErrorResponse {
 
         let enum_name = input.ident;
 
-        let default_status_code = get_single_attr(input.attrs.clone(), "default_status_code")?
-            .map(|attr| attr.parse_args::<StatusCode>())
-            .transpose()?
-            .map(|code| code.into_inner())
-            .unwrap_or(format_ident!("InternalServerError"));
+        let default_status_code = get_single_attr(
+            input
+                .attrs
+                .clone(),
+            "default_status_code",
+        )?
+        .map(|attr| attr.parse_args::<StatusCode>())
+        .transpose()?
+        .map(|code| code.into_inner())
+        .unwrap_or(format_ident!("InternalServerError"));
 
         let transform_response = get_single_attr(input.attrs, "transform_response")?
             .map(|attr| attr.parse_args::<Ident>())
             .transpose()?;
 
-        let variants = input.variants
+        let variants = input
+            .variants
             .into_iter()
-            .map(|variant| Ok(ErrorResponseVariant {
-                status_code: get_single_attr(variant.attrs.clone(), "status_code")?
+            .map(|variant| {
+                Ok(ErrorResponseVariant {
+                    status_code: get_single_attr(
+                        variant
+                            .attrs
+                            .clone(),
+                        "status_code",
+                    )?
                     .map(|attr| attr.parse_args::<StatusCode>())
                     .transpose()?
                     .map(|code| code.into_inner()),
-                variant
-            }))
+                    variant,
+                })
+            })
             .collect::<SynResult<Vec<_>>>()?;
 
-        Ok(Self { enum_name, default_status_code, transform_response, variants })
+        Ok(Self {
+            enum_name,
+            default_status_code,
+            transform_response,
+            variants,
+        })
     }
 }
 
 impl ErrorResponseVariant {
     #[inline(always)]
     pub const fn status_code(&self) -> Option<&Ident> {
-        self.status_code.as_ref()
+        self.status_code
+            .as_ref()
     }
 
     #[inline(always)]
@@ -96,13 +127,12 @@ impl Parse for StatusCode {
         if let Ok(integer) = input.parse::<LitInt>() {
             let parsed = integer
                 .base10_parse::<usize>()
-                .map_err(|error| SynError::new(
-                    error.span(),
-                    "Expected a usize value for number variant."
-                ))?;
+                .map_err(|error| {
+                    SynError::new(error.span(), "Expected a usize value for number variant.")
+                })?;
 
-            let status = code_to_status(parsed)
-                .ok_or_else(|| SynError::new_spanned(
+            let status = code_to_status(parsed).ok_or_else(|| {
+                SynError::new_spanned(
                     integer,
                     format!(
                         concat!(
@@ -113,8 +143,9 @@ impl Parse for StatusCode {
                             .iter()
                             .map(|(code, status)| format!("{code} -> {status}"))
                             .collect::<String>()
-                    )
-                ))?;
+                    ),
+                )
+            })?;
 
             return Ok(StatusCode(format_ident!("{status}")));
         }
@@ -133,16 +164,16 @@ impl Parse for StatusCode {
                         &ident_string,
                         match closest_status(&ident_string) {
                             Some(closest) => format!(", did you mean {closest}?"),
-                            None => String::new()
+                            None => String::new(),
                         }
-                    )
-                ))
+                    ),
+                )),
             };
         }
 
         Err(SynError::new(
             input.span(),
-            "Only HTTP status codes (usize) and refrences (Ident) are allowed."
+            "Only HTTP status codes (usize) and refrences (Ident) are allowed.",
         ))
     }
 }

@@ -1,16 +1,20 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{format_ident, quote, TokenStreamExt};
+use quote::{TokenStreamExt, format_ident, quote};
 use syn::Fields as VariantFields;
 
 use crate::macro_input::error_response::{ErrorResponse, ErrorResponseVariant};
 
-
 fn variant_match_head(variant: &ErrorResponseVariant) -> TokenStream2 {
-    let variant_name = &variant.variant().ident;
-    let variant_head_type = match variant.variant().fields {
+    let variant_name = &variant
+        .variant()
+        .ident;
+    let variant_head_type = match variant
+        .variant()
+        .fields
+    {
         VariantFields::Named(_) => quote! { {..} },
         VariantFields::Unnamed(_) => quote! { (..) },
-        VariantFields::Unit => quote! { },
+        VariantFields::Unit => quote! {},
     };
 
     quote! { Self::#variant_name #variant_head_type => }
@@ -19,31 +23,30 @@ fn variant_match_head(variant: &ErrorResponseVariant) -> TokenStream2 {
 pub fn error_response(input: ErrorResponse) -> TokenStream2 {
     let enum_name = input.enum_name();
 
-    let (http_response_variants, error_variants) = input.variants()
+    let (http_response_variants, error_variants) = input
+        .variants()
         .iter()
         .map(|variant| {
-            let status_code = variant.status_code()
+            let status_code = variant
+                .status_code()
                 .unwrap_or(input.default_status_code());
 
             let variant_head = variant_match_head(variant);
 
             let mut http_response_variant = variant_head.clone();
             let http_response_tokens = quote! { ::actix_web::HttpResponse::#status_code() };
-            http_response_variant.append_all(
-                match input.transform_response() {
-                    Some(transformer_fn) => quote! {
-                        #transformer_fn(#http_response_tokens, self.to_string())
-                    },
+            http_response_variant.append_all(match input.transform_response() {
+                Some(transformer_fn) => quote! {
+                    #transformer_fn(#http_response_tokens, self.to_string())
+                },
 
-                    None => http_response_tokens
-                }
-            );
+                None => http_response_tokens,
+            });
 
             let mut error_variant = variant_head.clone();
             let error_variant_ident = format_ident!("Error{status_code}");
-            error_variant.append_all(
-                quote! { ::actix_web::error::#error_variant_ident(self::to_string()) }
-            );
+            error_variant
+                .append_all(quote! { ::actix_web::error::#error_variant_ident(self::to_string()) });
 
             (http_response_variant, error_variant)
         })
