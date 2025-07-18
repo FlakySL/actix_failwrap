@@ -1,4 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
+use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 use syn::{
     Error as SynError,
@@ -11,8 +12,7 @@ use syn::{
     PathArguments,
     Result as SynResult,
     ReturnType,
-    Type,
-    TypePath,
+    Type
 };
 
 const HTTP_METHODS: [&str; 9] =
@@ -26,13 +26,13 @@ pub struct ProofRouteMeta {
 pub struct ProofRouteBody {
     name: Ident,
     parameters: Vec<ProofRouteParameter>,
-    return_error: TypePath,
+    return_error: Type,
     function: ItemFn,
 }
 
 pub struct ProofRouteParameter {
     error_override: Option<Expr>,
-    parameter: FnArg,
+    ty: Type,
 }
 
 impl ProofRouteMeta {
@@ -102,7 +102,7 @@ impl ProofRouteBody {
     }
 
     #[inline(always)]
-    pub fn return_error(&self) -> &TypePath {
+    pub fn return_error(&self) -> &Type {
         &self.return_error
     }
 
@@ -139,39 +139,6 @@ impl Parse for ProofRouteBody {
                 "Base actix route attributes are not allowed while using proof_route.",
             ));
         }
-
-        let parameters = function
-            .sig
-            .inputs
-            .clone()
-            .into_iter()
-            .map(|mut parameter| {
-                Ok::<_, SynError>(ProofRouteParameter {
-                    error_override: match parameter {
-                        FnArg::Receiver(_) => None,
-                        FnArg::Typed(ref mut typed) => {
-                            let error_override = typed
-                                .attrs
-                                .iter()
-                                .find(|attribute| {
-                                    attribute
-                                        .path()
-                                        .is_ident("error_override")
-                                })
-                                .map(|attribute| attribute.parse_args::<Expr>())
-                                .transpose()?;
-
-                            typed
-                                .attrs
-                                .clear();
-
-                            error_override
-                        },
-                    },
-                    parameter,
-                })
-            })
-            .collect::<Result<Vec<_>, _>>()?;
 
         let return_error = match &function
             .sig
@@ -224,7 +191,7 @@ impl Parse for ProofRouteBody {
                         match (&arguments.args[0], &arguments.args[1]) {
                             (
                                 GenericArgument::Type(Type::Path(res)),
-                                GenericArgument::Type(Type::Path(err)),
+                                GenericArgument::Type(err),
                             ) => {
                                 if !res
                                     .path
@@ -279,6 +246,46 @@ impl Parse for ProofRouteBody {
             },
         };
 
+        let parameters = function
+            .sig
+            .inputs
+            .iter()
+            .filter_map(|parameter| match parameter {
+                FnArg::Receiver(_) => None,
+                FnArg::Typed(typed) => Some(typed.clone()),
+            })
+            .map(|mut parameter| {
+                Ok::<_, SynError>(ProofRouteParameter {
+                    error_override: {
+                        let error_override = parameter
+                            .attrs
+                            .iter()
+                            .find(|attribute| {
+                                attribute
+                                    .path()
+                                    .is_ident("error_override")
+                            })
+                            .map(|attribute| attribute.parse_args::<Expr>())
+                            .transpose()
+                            .map_err(|err| SynError::new(
+                                err.span(),
+                                format!(
+                                    "Expected a {} variant.",
+                                    return_error.to_token_stream()
+                                )
+                            ))?;
+
+                        parameter
+                            .attrs
+                            .clear();
+
+                        error_override
+                    },
+                    ty: *parameter.ty,
+                })
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
         function
             .attrs
             .clear();
@@ -295,7 +302,7 @@ impl ProofRouteParameter {
     }
 
     #[inline(always)]
-    pub fn parameter(&self) -> &FnArg {
-        &self.parameter
+    pub fn ty(&self) -> &Type {
+        &self.ty
     }
 }
