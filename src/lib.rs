@@ -24,5 +24,5 @@ pub fn proof_route(meta: TokenStream, body: TokenStream) -> TokenStream {
         parse_macro_input!(meta as ProofRouteMeta),
         parse_macro_input!(body as ProofRouteBody),
     )
-        .into()
+    .into()
 }

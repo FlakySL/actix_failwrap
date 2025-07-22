@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{format_ident, quote, TokenStreamExt};
+use quote::{TokenStreamExt, format_ident, quote};
 
 use crate::macro_input::proof_route::{ProofRouteBody, ProofRouteMeta};
 
@@ -23,7 +23,7 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
             let ty = curr.ty();
             let error_override = match curr.error_override() {
                 Some(error) => quote! { Err(_) => return #error.into() },
-                None => quote! { Err(error) => return error.into() }
+                None => quote! { Err(error) => return error.into() },
             };
 
             acc.append_all(quote! {

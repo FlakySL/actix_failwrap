@@ -12,7 +12,7 @@ use syn::{
     PathArguments,
     Result as SynResult,
     ReturnType,
-    Type
+    Type,
 };
 
 const HTTP_METHODS: [&str; 9] =
@@ -267,13 +267,15 @@ impl Parse for ProofRouteBody {
                             })
                             .map(|attribute| attribute.parse_args::<Expr>())
                             .transpose()
-                            .map_err(|err| SynError::new(
-                                err.span(),
-                                format!(
-                                    "Expected a {} variant.",
-                                    return_error.to_token_stream()
+                            .map_err(|err| {
+                                SynError::new(
+                                    err.span(),
+                                    format!(
+                                        "Expected a {} variant.",
+                                        return_error.to_token_stream()
+                                    ),
                                 )
-                            ))?;
+                            })?;
 
                         parameter
                             .attrs
