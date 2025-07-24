@@ -13,17 +13,20 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
 
     let handler_name = body.name();
     let handler_function = body.function();
+    let handler_err_type = body.return_error();
 
     let parameters = body
         .parameters()
         .iter()
-        .enumerate()
-        .fold(TokenStream2::new(), |mut acc, (idx, curr)| {
-            let ident = format_ident!("_{idx}");
+        .fold(TokenStream2::new(), |mut acc, curr| {
             let ty = curr.ty();
             let error_override = match curr.error_override() {
-                Some(error) => quote! { Err(_) => return #error.into() },
-                None => quote! { Err(error) => return error.into() },
+                Some(error) => quote! { Err(_) => {
+                    // limited for cleanness.
+                    let error: #handler_err_type = #error;
+                    return error.into();
+                } },
+                None => quote! { Err(error) => return error.into(); },
             };
 
             acc.append_all(quote! {
