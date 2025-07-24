@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{TokenStreamExt, format_ident, quote};
+use quote::{format_ident, quote};
 
 use crate::macro_input::proof_route::{ProofRouteBody, ProofRouteMeta};
 
@@ -15,10 +15,12 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
     let handler_function = body.function();
     let handler_err_type = body.return_error();
 
-    let parameters = body
-        .parameters()
+    let parameters = body.parameters();
+    let parameters = parameters
         .iter()
-        .fold(TokenStream2::new(), |mut acc, curr| {
+        .enumerate()
+        .fold(Vec::with_capacity(parameters.len()), |mut acc, (idx, curr)| {
+            let var_name = format_ident!("__{idx}");
             let ty = curr.ty();
             let error_override = match curr.error_override() {
                 Some(error) => quote! { Err(_) => {
@@ -26,19 +28,22 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
                     let error: #handler_err_type = #error;
                     return error.into();
                 } },
-                None => quote! { Err(error) => return error.into(); },
+                None => quote! { Err(error) => return error.into() },
             };
 
-            acc.append_all(quote! {
-                match
+            acc.push(quote! {
+                let #var_name: #ty = match
                 <#ty as ::actix_web::FromRequest>::from_request(&__request, &mut __payload).await {
                     Ok(value) => value,
                     #error_override
-                },
+                };
             });
 
             acc
         });
+
+    let param_references = (0..parameters.len())
+        .map(|idx| format_ident!("__{idx}"));
 
     quote! {
         #[::actix_web::#http_method(#http_path)]
@@ -53,7 +58,9 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
             #[doc(hidden)]
             let mut __payload = __payload.into_inner();
 
-            match #handler_name(#parameters).await {
+            #(#parameters)*
+
+            match #handler_name(#(#param_references),*).await {
                 ::std::result::Result::Ok(result) => result,
                 ::std::result::Result::Err(error) => error.into()
             }

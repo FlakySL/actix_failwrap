@@ -94,6 +94,13 @@ impl Parse for ErrorResponse {
             })
             .collect::<SynResult<Vec<_>>>()?;
 
+        if variants.is_empty() {
+            return Err(SynError::new_spanned(
+                enum_name,
+                "Expected at least 1 variant in this error type."
+            ));
+        }
+
         Ok(Self {
             enum_name,
             default_status_code,
