@@ -1,4 +1,3 @@
-use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 use syn::{
@@ -51,40 +50,32 @@ impl Parse for ProofRouteMeta {
     fn parse(input: ParseStream) -> SynResult<Self> {
         let lit_str = input.parse::<LitStr>()?;
 
-        if lit_str
+        let Some((method, path)) = lit_str
             .value()
             .split_once(" ")
-            .is_none()
-        {
+            .map(|(m, p)| (m.to_string(), p.to_string()))
+        else {
             return Err(SynError::new_spanned(
                 lit_str,
-                "Expected a space in between the method and the path.",
+                concat!(
+                    "Expected a space in between the method and the path,",
+                    " example: \"<method> <path>\"."
+                ),
+            ));
+        };
+
+        if !HTTP_METHODS
+            .iter()
+            .any(|available| available.eq_ignore_ascii_case(&method))
+        {
+            return Err(SynError::new_spanned(
+                &method,
+                format!(
+                    "{method} is not a valid HTTP method, expected any of {}",
+                    HTTP_METHODS.join(", ")
+                ),
             ));
         }
-
-        let (method, path) = lit_str.parse_with(|inner: ParseStream| {
-            let method = inner
-                .parse::<Ident>()?
-                .to_string();
-            let path = inner
-                .parse::<TokenStream2>()?
-                .to_string();
-
-            if !HTTP_METHODS
-                .iter()
-                .any(|available| available.eq_ignore_ascii_case(&method))
-            {
-                Err(SynError::new_spanned(
-                    &method,
-                    format!(
-                        "{method} is not a valid HTTP method, expected any of {}",
-                        HTTP_METHODS.join(", ")
-                    ),
-                ))
-            } else {
-                Ok((method, path))
-            }
-        })?;
 
         Ok(Self { method, path })
     }
