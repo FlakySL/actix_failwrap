@@ -18,14 +18,25 @@ macro_rules! test_http_endpoint {
         #[::actix_web::test]
         #[doc(hidden)]
         async fn $test_name() {
+            #[allow(unused_imports)]
+            use std::fmt::Write as _;
+
             let listener = ::std::net::TcpListener::bind("0.0.0.0:0")
                 .expect("Failed to bind random port.");
             let local_addr = listener.local_addr()
                 .expect("Failed to get local address.");
-            let url = ::std::format!(
-                "http://{local_addr}{}",
-                stringify!(/$($($req_path_segment)*)? $(?$($req_query_key=$req_query_value)*)?)
-            );
+            let mut url = ::std::format!("http://{local_addr}");
+            $($(
+                ::std::write!(url, "/{}", ::std::stringify!($req_path_segment))
+                    .unwrap();
+            )*)?
+            ::std::write!(url, "?")
+                .unwrap();
+            $($(
+                ::std::write!(url, "{}={}", ::std::stringify!($req_query_key), $req_query_value)
+                    .unwrap();
+            )*)?
+            println!("{url}");
 
             let server_thread = ::actix_web::rt::spawn(async move {
                 ::actix_web::HttpServer::new(|| {
