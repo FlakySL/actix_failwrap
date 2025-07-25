@@ -1,4 +1,4 @@
-use actix_failwrap_proc::{proof_route, ErrorResponse};
+use actix_failwrap_proc::{ErrorResponse, proof_route};
 use actix_web::HttpResponse;
 use actix_web::web::{Json, Query};
 use serde::Deserialize;
@@ -9,14 +9,14 @@ mod common;
 #[derive(Deserialize)]
 #[expect(dead_code)]
 struct TestQuery {
-    token: String
+    token: String,
 }
 
 #[derive(Deserialize)]
 #[expect(dead_code)]
 struct TestPerson {
     name: String,
-    age: i32
+    age: i32,
 }
 
 #[derive(ErrorResponse, Error, Debug)]
@@ -31,7 +31,7 @@ enum TestError {
 #[proof_route("GET /")]
 async fn collector_overrides(
     #[error_override(CouldNotParseQuery)] _query: Query<TestQuery>,
-    #[error_override(CouldNotParseBody)] mut _body: Json<TestPerson>
+    #[error_override(CouldNotParseBody)] mut _body: Json<TestPerson>,
 ) -> Result<HttpResponse, TestError> {
     Ok(HttpResponse::Ok().finish())
 }

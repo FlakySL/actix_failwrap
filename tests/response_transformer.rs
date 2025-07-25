@@ -1,12 +1,11 @@
-use actix_failwrap_proc::{proof_route, ErrorResponse};
+use actix_failwrap_proc::{ErrorResponse, proof_route};
 use actix_web::{HttpResponse, HttpResponseBuilder};
 use thiserror::Error;
 
 mod common;
 
 fn error_to_header(mut code: HttpResponseBuilder, format: String) -> HttpResponse {
-    code
-        .insert_header(("Error", format))
+    code.insert_header(("Error", format))
         .finish()
 }
 

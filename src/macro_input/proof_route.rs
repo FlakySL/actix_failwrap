@@ -275,12 +275,19 @@ impl Parse for ProofRouteBody {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        for mut input in function.sig.inputs.iter_mut() {
+        for mut input in function
+            .sig
+            .inputs
+            .iter_mut()
+        {
             if let FnArg::Typed(typed) = &mut input {
-                typed.attrs
-                    .retain(|attr| !attr.path()
-                        .is_ident("error_override")
-                    );
+                typed
+                    .attrs
+                    .retain(|attr| {
+                        !attr
+                            .path()
+                            .is_ident("error_override")
+                    });
             }
         }
 

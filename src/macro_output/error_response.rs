@@ -48,7 +48,7 @@ pub fn error_response_output(input: ErrorResponse) -> TokenStream2 {
                 }},
 
                 // Or if none we directly construct it.
-                None => quote!{
+                None => quote! {
                     #http_response_tokens
                         .body(self.to_string())
                 },

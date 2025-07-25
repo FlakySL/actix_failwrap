@@ -97,7 +97,7 @@ impl Parse for ErrorResponse {
         if variants.is_empty() {
             return Err(SynError::new_spanned(
                 enum_name,
-                "Expected at least 1 variant in this error type."
+                "Expected at least 1 variant in this error type.",
             ));
         }
 

@@ -42,8 +42,7 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
             acc
         });
 
-    let param_references = (0..parameters.len())
-        .map(|idx| format_ident!("__{idx}"));
+    let param_references = (0..parameters.len()).map(|idx| format_ident!("__{idx}"));
 
     quote! {
         #[::actix_web::#http_method(#http_path)]

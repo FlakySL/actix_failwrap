@@ -1,5 +1,6 @@
-use actix_failwrap_proc::{proof_route, ErrorResponse};
-use actix_web::{web::Path, HttpResponse};
+use actix_failwrap_proc::{ErrorResponse, proof_route};
+use actix_web::HttpResponse;
+use actix_web::web::Path;
 use thiserror::Error;
 
 mod common;
@@ -12,7 +13,7 @@ enum TestError {
 
     #[error("Specific override.")]
     #[status_code(404)]
-    SpecificOverride
+    SpecificOverride,
 }
 
 #[proof_route("GET /{error_type}")]
@@ -20,7 +21,7 @@ async fn error_overrides(error_type: Path<String>) -> Result<HttpResponse, TestE
     match error_type.as_str() {
         "general" => Err(TestError::GeneralOverride),
         "specific" => Err(TestError::SpecificOverride),
-        _ => unreachable!("The test shouldn't even receive any other value.")
+        _ => unreachable!("The test shouldn't even receive any other value."),
     }
 }
 
