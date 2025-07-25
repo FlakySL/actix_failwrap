@@ -33,18 +33,33 @@ async fn variant_types(error_type: Path<String>) -> Result<HttpResponse, TestErr
 
 test_http_endpoint!(
     test variant_types as test_variant_unit
-    with get "/unit" ""
-    and expect 500 "This is a unit type error."
+    with request {
+        head: get /unit;
+    }
+    and expect response {
+        head: 500;
+        body: { "This is a unit type error." }
+    }
 );
 
 test_http_endpoint!(
     test variant_types as test_variant_tuple
-    with get "/tuple" ""
-    and expect 500 "This is a tuple type error containing (69)."
+    with request {
+        head: get /tuple;
+    }
+    and expect response {
+        head: 500;
+        body: { "This is a tuple type error containing (69)." }
+    }
 );
 
 test_http_endpoint!(
     test variant_types as test_variant_object
-    with get "/object" ""
-    and expect 500 "This is a struct type error representing a person with name John and age 36."
+    with request {
+        head: get /object;
+    }
+    and expect response {
+        head: 500;
+        body: { "This is a struct type error representing a person with name John and age 36." }
+    }
 );

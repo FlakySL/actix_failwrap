@@ -38,16 +38,29 @@ async fn collector_overrides(
 
 test_http_endpoint!(
     test collector_overrides as test_collector_override_non_mut
-
-    with get "/" r#"{"name":"John","age":50}"#
-
-    and expect 500 "Could not parse query."
+    with request {
+        head: get /;
+        body: {
+            r#"{"name":"John","age":50}"#
+        }
+    }
+    and expect response {
+        head: 500;
+        body: {
+            "Could not parse query."
+        }
+    }
 );
 
 test_http_endpoint!(
     test collector_overrides as test_collector_override_mut
-
-    with get "/?token=60645bce-4c7c-44f8-b103-b2c7de797e6a" ""
-
-    and expect 500 "Could not parse body."
+    with request {
+        head: get /?token="c65acefb-d403-4094-9b9b-01d0325b66a3";
+    }
+    and expect response {
+        head: 500;
+        body: {
+            "Could not parse body."
+        }
+    }
 );

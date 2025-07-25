@@ -4,8 +4,16 @@
 macro_rules! test_http_endpoint {
     (
         test $endpoint:ident as $test_name:ident
-        with $method:ident $url:literal $($req_h_key:ident: $req_h_value:literal)* $req_body:literal
-        and expect $code:literal $($res_h_key:ident: $res_h_value:literal)* $($res_body:literal)?
+        with request {
+            head: $req_method:ident /$($($req_path_segment:ident)/+)? $(?$($req_query_key:ident=$req_query_value:literal)&*)?;
+            $(headers: { $($req_header_key:ident: $req_header_value:literal)* })?
+            $(body: { $req_body:expr })?
+        }
+        and expect response {
+            head: $res_code:literal;
+            $(headers: { $($res_header_key:ident: $res_header_value:literal)* })?
+            $(body: { $res_body:expr })?
+        }
     ) => {
         #[::actix_web::test]
         #[doc(hidden)]
@@ -16,7 +24,7 @@ macro_rules! test_http_endpoint {
                 .expect("Failed to get local address.");
             let url = ::std::format!(
                 "http://{local_addr}{}",
-                $url
+                stringify!(/$($($req_path_segment)*)? $(?$($req_query_key=$req_query_value)*)?)
             );
 
             let server_thread = ::actix_web::rt::spawn(async move {
@@ -40,30 +48,32 @@ macro_rules! test_http_endpoint {
             }
 
             let response = ::reqwest::Client::new()
-                .$method(url)
+                .$req_method(url)
                 .headers(
                     ::reqwest::header::HeaderMap::from_iter([
                         $((
-                            ::reqwest::header::HeaderName::from_static(::std::stringify!($req_h_key)),
-                            ::reqwest::header::HeaderValue::from_static($req_h_value)
+                            ::reqwest::header::HeaderName::from_static(::std::stringify!($req_header_key)),
+                            ::reqwest::header::HeaderValue::from_static($req_header_value)
                         )),*
                     ])
                 )
-                .body($req_body)
+                $(
+                    .body($req_body)
+                )?
                 .send()
                 .await
                 .expect("Failed to send test request.");
 
-            ::std::assert_eq!(response.status(), $code);
+            ::std::assert_eq!(response.status(), $res_code);
 
-            {
+            $({
                 #[allow(unused)]
                 let res_headers = response.headers();
                 $(::std::assert_eq!(
-                    res_headers.get(::std::stringify!($res_h_key)),
-                    Some(&::reqwest::header::HeaderValue::from_static($res_h_value))
+                    res_headers.get(::std::stringify!($res_header_key)),
+                    Some(&::reqwest::header::HeaderValue::from_static($res_header_value))
                 );)*
-            }
+            })?
 
             $(
                 ::std::assert_eq!(

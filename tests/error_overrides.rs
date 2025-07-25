@@ -26,12 +26,26 @@ async fn error_overrides(error_type: Path<String>) -> Result<HttpResponse, TestE
 
 test_http_endpoint!(
     test error_overrides as test_error_override_general
-    with get "/general" ""
-    and expect 400 "General override."
+    with request {
+        head: get /general;
+    }
+    and expect response {
+        head: 400;
+        body: {
+            "General override."
+        }
+    }
 );
 
 test_http_endpoint!(
     test error_overrides as test_error_override_specific
-    with get "/specific" ""
-    and expect 404 "Specific override."
+    with request {
+        head: get /specific;
+    }
+    and expect response {
+        head: 404;
+        body: {
+            "Specific override."
+        }
+    }
 );

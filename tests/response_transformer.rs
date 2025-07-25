@@ -24,9 +24,13 @@ async fn response_transformer() -> Result<HttpResponse, TestError> {
 
 test_http_endpoint!(
     test response_transformer as test_response_transformer
-
-    with get "/" ""
-
-    and expect 500
-    Error: "This goes on a header."
+    with request {
+        head: get /;
+    }
+    and expect response {
+        head: 500;
+        headers: {
+            Error: "This goes on a header"
+        }
+    }
 );
