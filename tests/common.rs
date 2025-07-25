@@ -36,7 +36,6 @@ macro_rules! test_http_endpoint {
                 ::std::write!(url, "{}={}", ::std::stringify!($req_query_key), $req_query_value)
                     .unwrap();
             )*)?
-            println!("{url}");
 
             let server_thread = ::actix_web::rt::spawn(async move {
                 ::actix_web::HttpServer::new(|| {

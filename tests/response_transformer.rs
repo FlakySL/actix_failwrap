@@ -30,7 +30,7 @@ test_http_endpoint!(
     and expect response {
         head: 500;
         headers: {
-            Error: "This goes on a header."
+            Error: "This goes on a header"
         }
     }
 );
