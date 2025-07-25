@@ -240,12 +240,12 @@ impl Parse for ProofRouteBody {
         let parameters = function
             .sig
             .inputs
-            .iter()
+            .iter_mut()
             .filter_map(|parameter| match parameter {
                 FnArg::Receiver(_) => None,
                 FnArg::Typed(typed) => Some(typed.clone()),
             })
-            .map(|mut parameter| {
+            .map(|parameter| {
                 Ok::<_, SynError>(ProofRouteParameter {
                     error_override: {
                         let error_override = parameter
@@ -268,10 +268,6 @@ impl Parse for ProofRouteBody {
                                 )
                             })?;
 
-                        parameter
-                            .attrs
-                            .clear();
-
                         error_override
                     },
                     ty: *parameter.ty,
@@ -279,9 +275,14 @@ impl Parse for ProofRouteBody {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        function
-            .attrs
-            .clear();
+        for mut input in function.sig.inputs.iter_mut() {
+            if let FnArg::Typed(typed) = &mut input {
+                typed.attrs
+                    .retain(|attr| !attr.path()
+                        .is_ident("error_override")
+                    );
+            }
+        }
 
         Ok(Self { name, parameters, return_error, function })
     }

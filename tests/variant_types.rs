@@ -23,7 +23,6 @@ enum TestError {
 
 #[proof_route("GET /{error_type}")]
 async fn variant_types(error_type: Path<String>) -> Result<HttpResponse, TestError> {
-
     match error_type.as_str() {
         "unit" => Err(TestError::Unit),
         "tuple" => Err(TestError::Tuple(69)),
@@ -33,19 +32,19 @@ async fn variant_types(error_type: Path<String>) -> Result<HttpResponse, TestErr
 }
 
 test_http_endpoint!(
-    test variant_types as test_unit
+    test variant_types as test_variant_unit
     with get "/unit" ""
     and expect 500 "This is a unit type error."
 );
 
 test_http_endpoint!(
-    test variant_types as test_tuple
+    test variant_types as test_variant_tuple
     with get "/tuple" ""
     and expect 500 "This is a tuple type error containing (69)."
 );
 
 test_http_endpoint!(
-    test variant_types as test_object
+    test variant_types as test_variant_object
     with get "/object" ""
     and expect 500 "This is a struct type error representing a person with name John and age 36."
 );

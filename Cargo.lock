@@ -193,6 +193,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "reqwest",
+ "serde",
  "strsim",
  "syn",
  "thiserror",

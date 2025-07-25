@@ -61,7 +61,7 @@ macro_rules! test_http_endpoint {
                 let res_headers = response.headers();
                 $(::std::assert_eq!(
                     res_headers.get(::std::stringify!($res_h_key)),
-                    ::reqwest::header::HeaderValue::from_static($res_h_value)
+                    Some(&::reqwest::header::HeaderValue::from_static($res_h_value))
                 );)*
             }
 

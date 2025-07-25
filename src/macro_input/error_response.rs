@@ -148,7 +148,7 @@ impl Parse for StatusCode {
                         ),
                         allowed_status_pairs()
                             .iter()
-                            .map(|(code, status)| format!("{code} -> {status}"))
+                            .map(|(code, status)| format!("{code} -> {status}\n"))
                             .collect::<String>()
                     ),
                 )

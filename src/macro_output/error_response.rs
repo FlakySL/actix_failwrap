@@ -36,15 +36,22 @@ pub fn error_response_output(input: ErrorResponse) -> TokenStream2 {
             let mut http_response_variant = variant_head.clone();
             let http_response_tokens = quote! {
                 ::actix_web::HttpResponse::#status_code()
-                    // we repeat the body because of transformer.
-                    .body(self.to_string())
             };
-            http_response_variant.append_all(match input.transform_response() {
-                Some(transformer_fn) => quote! {
-                    #transformer_fn(#http_response_tokens, self.to_string())
-                },
 
-                None => http_response_tokens,
+            http_response_variant.append_all(match input.transform_response() {
+                // We or either pass the variant trough transformer_fn
+                Some(transformer_fn) => quote! {{
+                    let transformed: ::actix_web::HttpResponse // type checking.
+                        = #transformer_fn(#http_response_tokens, self.to_string());
+
+                    transformed
+                }},
+
+                // Or if none we directly construct it.
+                None => quote!{
+                    #http_response_tokens
+                        .body(self.to_string())
+                },
             });
 
             let mut error_variant = variant_head.clone();

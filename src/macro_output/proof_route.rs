@@ -25,7 +25,7 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
             let error_override = match curr.error_override() {
                 Some(error) => quote! { Err(_) => {
                     // limited for cleanness.
-                    let error: #handler_err_type = #error;
+                    let error: #handler_err_type = #handler_err_type::#error;
                     return error.into();
                 } },
                 None => quote! { Err(error) => return error.into() },
