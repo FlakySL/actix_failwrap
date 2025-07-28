@@ -196,8 +196,6 @@ An example function signature looks like
 #[proof_route("GET /users")]
 async fn get_users() -> Result<HttpResponse, Error> {}
 ```
-```
-```
 
 > [!TIP]
 > You can use a `Result<_, Error>` instead of `HttpResponse`, as that's inferred.
