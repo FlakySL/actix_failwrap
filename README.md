@@ -217,7 +217,6 @@ For more information read the [license file][license].
 [crates.io]: https://crates.io/crates/actix_failwrap
 [actix-web]: https://crates.io/crates/actix-web
 [thiserror]: https://crates.io/crates/thiserror
-[license]: https://github.com/FlakySL/actix_failwrap/blob/main/LICENSE
 
 <!-- Contact information -->
 [licensing@flaky.es]: mailto:licensing@flaky.es
