@@ -135,6 +135,7 @@ impl Parse for ProofRouteBody {
             .sig
             .output
         {
+            // If the return type is (), disallow with a custom message.
             ReturnType::Default => {
                 return Err(SynError::new_spanned(
                     &name,
@@ -143,7 +144,10 @@ impl Parse for ProofRouteBody {
                 ));
             },
 
+            // If it's a type check the type
             ReturnType::Type(_, ty) => {
+                // If the type is not a path it may possibly not be an error
+                // so disallow.
                 let Type::Path(ty) = ty.as_ref() else {
                     return Err(SynError::new_spanned(
                         ty,
@@ -154,6 +158,9 @@ impl Parse for ProofRouteBody {
                     ));
                 };
 
+                // If the last segment is not Result disallow,
+                // this can be spoofed with a type alias or another unrelated type,
+                // but will probably fail.
                 let Some(last_return_segment) = ty
                     .path
                     .segments
@@ -167,7 +174,9 @@ impl Parse for ProofRouteBody {
                 };
 
                 match &last_return_segment.arguments {
+                    // The type arguments must be generics <>.
                     PathArguments::AngleBracketed(arguments) => {
+                        // There must be two of them, not 0, 1 or 3
                         if arguments
                             .args
                             .len()
@@ -179,7 +188,17 @@ impl Parse for ProofRouteBody {
                             ));
                         }
 
+                        // Check the argument types
                         match (&arguments.args[0], &arguments.args[1]) {
+                            // If the arguments are <_, Error> its "inferred".
+                            (
+                                GenericArgument::Type(Type::Infer(_)),
+                                GenericArgument::Type(err)
+                            ) => {
+                                err.clone()
+                            }
+
+                            // If the arguments are <HttpResponse, Error> that's the target type.
                             (
                                 GenericArgument::Type(Type::Path(res)),
                                 GenericArgument::Type(err),
@@ -197,9 +216,11 @@ impl Parse for ProofRouteBody {
                                     ));
                                 }
 
+                                // We don't use the "HttpResponse" tokens, we just asume them.
                                 err.clone()
                             },
 
+                            // Any other thing, throw out.
                             _ => {
                                 return Err(SynError::new_spanned(
                                     ty,

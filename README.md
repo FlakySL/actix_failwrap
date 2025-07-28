@@ -176,8 +176,6 @@ allowing direct propagation with the `?` operator in handlers.
   Customizes how the response is built. Takes a function of signature:
   `fn(HttpResponseBuilder, String) -> HttpResponse`.
 
----
-
 ### `#[proof_route(...)]`
 
 Simplifies route definition and error propagation.
@@ -192,9 +190,21 @@ Expands to:
 #[actix_web::post("/path")]
 ```
 
+An example function signature looks like
+
+```rust
+#[proof_route("GET /users")]
+async fn get_users() -> Result<HttpResponse, Error> {}
+```
+```
+```
+
+> [!TIP]
+> You can use a `Result<_, Error>` instead of `HttpResponse`, as that's inferred.
+
 Allows you to:
 
-- Use [`?`][?] directly in route bodies.
+- Use `Result<HttpResponse, Error>` directly in route bodies.
 - Avoid importing `#[post]`, `#[get]`, etc. individually.
 - Support extractor error override via `#[error_override(...)]`.
 
