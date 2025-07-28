@@ -191,12 +191,9 @@ impl Parse for ProofRouteBody {
                         // Check the argument types
                         match (&arguments.args[0], &arguments.args[1]) {
                             // If the arguments are <_, Error> its "inferred".
-                            (
-                                GenericArgument::Type(Type::Infer(_)),
-                                GenericArgument::Type(err)
-                            ) => {
+                            (GenericArgument::Type(Type::Infer(_)), GenericArgument::Type(err)) => {
                                 err.clone()
-                            }
+                            },
 
                             // If the arguments are <HttpResponse, Error> that's the target type.
                             (
