@@ -54,7 +54,7 @@ This crate allows you to:
 
 ---
 
-# Installation 📦
+## Installation 📦
 
 > [!IMPORTANT]
 > The `actix_failwrap` macros rely on [`thiserror`][thiserror] for the `Display` implementation, and are tightly coupled with [`actix-web`][actix-web] for building HTTP responses.
