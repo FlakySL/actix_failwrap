@@ -8,8 +8,6 @@
 ![tests][tests-badge]
 [![Discord][discord-badge]][discord]
 
----
-
 `actix_failwrap` */ˈæk.tɪks ˈfeɪl.ræp/* ("*aktiks fail-rap*") A micro-package that enables ergonomic **error propagation** (via [`thiserror`][thiserror]) inside Actix Web route handlers.
 
 This crate allows you to:
@@ -157,8 +155,6 @@ async fn post_login(
 
 This crate exports two macros: `ErrorResponse` and `proof_route`.
 
----
-
 ### `#[derive(ErrorResponse)]`
 
 Implements `Into<actix_web::HttpResponse>` and `Into<actix_web::Error>` for your `thiserror` enums,
@@ -169,15 +165,15 @@ allowing direct propagation with the `?` operator in handlers.
 
 #### Supported Attributes
 
-- `#[default_status_code(...)]`  
-  Fallback status code used if a variant does not have its own `#[status_code(...)]`.  
+- `#[default_status_code(...)]`
+  Fallback status code used if a variant does not have its own `#[status_code(...)]`
   Defaults to `InternalServerError` (500).
 
-- `#[status_code(...)]`  
+- `#[status_code(...)]`
   Sets the HTTP status code for a specific variant. Accepts a named status (e.g. `BadRequest`) or number (`400`).
 
-- `#[transform_response(fn)]`  
-  Customizes how the response is built. Takes a function of signature:  
+- `#[transform_response(fn)]`
+  Customizes how the response is built. Takes a function of signature:
   `fn(HttpResponseBuilder, String) -> HttpResponse`.
 
 ---
@@ -209,8 +205,6 @@ Allows you to:
 This repository is dual licensed, If your repository is open source, the library is free of use, otherwise contact [licensing@flaky.es] for a custom license for your use case.
 
 For more information read the [license file][license].
-
----
 
 <!-- Reference Links -->
 [?]: https://doc.rust-lang.org/reference/expressions/operator-expr.html#r-expr.try
