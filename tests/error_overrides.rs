@@ -1,4 +1,4 @@
-use actix_failwrap_proc::{ErrorResponse, proof_route};
+use actix_failwrap::{ErrorResponse, proof_route};
 use actix_web::HttpResponse;
 use actix_web::web::Path;
 use thiserror::Error;
