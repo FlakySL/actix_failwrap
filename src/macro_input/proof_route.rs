@@ -278,10 +278,7 @@ impl Parse for ProofRouteBody {
                         .map_err(|err| {
                             SynError::new(
                                 err.span(),
-                                format!(
-                                    "Expected a {} variant.",
-                                    return_error.to_token_stream()
-                                ),
+                                format!("Expected a {} variant.", return_error.to_token_stream()),
                             )
                         })?,
                     ty: *parameter.ty,

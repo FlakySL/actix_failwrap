@@ -186,7 +186,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "actix_failwrap_proc"
+name = "actix_failwrap"
 version = "1.0.0"
 dependencies = [
  "actix-web",
