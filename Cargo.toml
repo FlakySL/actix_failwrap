@@ -1,6 +1,6 @@
 [package]
-name = "actix_failwrap_proc"
-description = "Combine the power of thiserror with Actix Web for expressive error types and effortless propagation using the ? operator."
+name = "actix_failwrap"
+description = "A micro-package that enables ergonomic error propagation (using thiserror) inside actix-web route handlers."
 repository = "https://github.com/FlakySL/actix_failwrap"
 license = "GPL-3.0"
 readme = "../README.md"

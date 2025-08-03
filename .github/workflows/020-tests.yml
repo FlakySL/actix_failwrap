@@ -1,9 +1,10 @@
 name: tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_run:
+    workflows: ["format"]
+    types:
+      - completed
 
 jobs:
   coverage:
@@ -32,7 +33,7 @@ jobs:
         id: coverage
         run: |
           set -o pipefail
-          make cov export-lcov=1 | tee output.log
+          make coverage export=_ | tee output.log
           coverage=$(grep 'Total Coverage: ' output.log | awk '{print $3}')
           echo "coverage_percentage=${coverage%\%}" >> $GITHUB_OUTPUT
           echo "Detected coverage: ${coverage}"
