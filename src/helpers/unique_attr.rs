@@ -30,12 +30,12 @@ pub fn get_single_attr<I: IntoIterator<Item = Attribute>>(
                             .unwrap_or(acc)
                     })
                 })
-                .unwrap_or_else(|| Span::call_site());
+                .unwrap_or_else(Span::call_site);
 
-            return Err(SynError::new(
+            Err(SynError::new(
                 extra_attr_spans,
                 format!("{ident} attribute is allowed only once."),
-            ));
+            ))
         },
     }
 }

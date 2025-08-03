@@ -265,29 +265,25 @@ impl Parse for ProofRouteBody {
             })
             .map(|parameter| {
                 Ok::<_, SynError>(ProofRouteParameter {
-                    error_override: {
-                        let error_override = parameter
-                            .attrs
-                            .iter()
-                            .find(|attribute| {
-                                attribute
-                                    .path()
-                                    .is_ident("error_override")
-                            })
-                            .map(|attribute| attribute.parse_args::<Expr>())
-                            .transpose()
-                            .map_err(|err| {
-                                SynError::new(
-                                    err.span(),
-                                    format!(
-                                        "Expected a {} variant.",
-                                        return_error.to_token_stream()
-                                    ),
-                                )
-                            })?;
-
-                        error_override
-                    },
+                    error_override: parameter
+                        .attrs
+                        .iter()
+                        .find(|attribute| {
+                            attribute
+                                .path()
+                                .is_ident("error_override")
+                        })
+                        .map(|attribute| attribute.parse_args::<Expr>())
+                        .transpose()
+                        .map_err(|err| {
+                            SynError::new(
+                                err.span(),
+                                format!(
+                                    "Expected a {} variant.",
+                                    return_error.to_token_stream()
+                                ),
+                            )
+                        })?,
                     ty: *parameter.ty,
                 })
             })
