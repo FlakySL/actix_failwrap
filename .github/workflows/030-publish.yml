@@ -60,16 +60,32 @@ jobs:
       - name: Publish to crates.io
         if: steps.should_publish.outputs.publish == 'true'
         run: |
-          cargo publish -p translatable_shared
-          cargo publish -p translatable_proc
-          cargo publish -p translatable
+          cargo publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
 
-      - name: Crate and push new git tag
+      - name: Create and push new git tag
         if: steps.should_publish.outputs.publish == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ steps.crate_version.outputs.version }}
           git push origin ${{ steps.crate_version.outputs.version }}
+
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: --verbose --latest --strip header
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.crate_version_outputs.version }}
+          release_name: Release ${{ steps.crate_version.outputs.version }}
+          body: ${{ steps.git-cliff.outputs.content }}
+          draft: false
+          prerelease: false

@@ -43,8 +43,7 @@ test_http_endpoint! {
 	}
 }
 ```
-```
-```
+
 Note that you don't need to specify all the headers, this is just inclusive checking.
 You can not include headers or body at all, the result of including a header is just
 generating an assert about that header with that key being `Some()` and having the same value.

@@ -1,13 +1,12 @@
 name: tests
 
 on:
-  workflow_run:
-    workflows: ["format"]
-    types:
-      - completed
+  push:
+    branches: [main]
+  pull_request:
 
 jobs:
-  coverage:
+  tests:
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -27,16 +26,25 @@ jobs:
 
       - name: Install cargo-llvm-cov
         run: |
-          cargo binstall cargo-llvm-cov
+          cargo binstall cargo-llvm-cov -y
 
       - name: Generate coverage and get percentage
         id: coverage
         run: |
           set -o pipefail
-          make coverage export=_ | tee output.log
-          coverage=$(grep 'Total Coverage: ' output.log | awk '{print $3}')
+          coverage="$(make coverage export=_ | grep "coverage" | cut -d '=' -f 2)"
           echo "coverage_percentage=${coverage%\%}" >> $GITHUB_OUTPUT
           echo "Detected coverage: ${coverage}"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        if: github.ref == 'refs/heads/main'
+        with:
+          file: coverage.lcov
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: FlakySL/actix_failwrap
+          verbose: true
 
       - name: Fail if overall coverage is below 80%
         run: |
@@ -46,12 +54,3 @@ jobs:
           else
             echo "✅ Coverage meets requirement (${{ steps.coverage.outputs.coverage_percentage }}%)"
           fi
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          file: coverage.lcov
-          fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: FlakySL/actix_failwrap
-          verbose: true
