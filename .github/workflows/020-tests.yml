@@ -31,7 +31,6 @@ jobs:
       - name: Generate coverage and get percentage
         id: coverage
         run: |
-          set -o pipefail
           coverage="$(make coverage export=_ | grep "coverage" | cut -d '=' -f 2)"
           echo "coverage_percentage=${coverage%\%}" >> $GITHUB_OUTPUT
           echo "Detected coverage: ${coverage}"
