@@ -18,7 +18,6 @@ ifdef export
 	else \
 		EXPORT_PATH="$(export)"; \
 	fi; \
-	echo "export_path=$$EXPORT_PATH"; \
-	cargo llvm-cov --lcov -- --nocapture --test-threads=1 --color=always > $$EXPORT_PATH 2>/dev/null;
-	echo "success."
+	cargo llvm-cov --lcov -- --nocapture --test-threads=1 --color=always > $$EXPORT_PATH 2>/dev/null; \
+	echo "export_path=$$EXPORT_PATH" >&2
 endif

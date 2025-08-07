@@ -31,7 +31,7 @@ jobs:
       - name: Generate coverage and get percentage
         id: coverage
         run: |
-          coverage="$(make coverage export=_ | grep "coverage" | cut -d '=' -f 2)"
+          coverage="$(make coverage export=_ | grep "^coverage=" | head -n1 | cut -d '=' -f 2)"
           echo "coverage_percentage=${coverage%\%}" >> $GITHUB_OUTPUT
           echo "Detected coverage: ${coverage}"
 
