@@ -13,7 +13,7 @@ coverage:
 	echo "coverage=$$coverage";
 
 ifdef export
-	if [ "$(export)" == "_" ]; then \
+	if [ "$(export)" = "_" ]; then \
 		EXPORT_PATH="./coverage.lcov"; \
 	else \
 		EXPORT_PATH="$(export)"; \
