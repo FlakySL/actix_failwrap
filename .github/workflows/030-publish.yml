@@ -74,6 +74,7 @@ jobs:
 
       - name: Generate a changelog
         uses: orhun/git-cliff-action@v4
+        if: steps.should_publish.outputs.publish == 'true'
         id: git-cliff
         with:
           config: cliff.toml
@@ -81,6 +82,7 @@ jobs:
 
       - name: Create Release
         uses: actions/create-release@v1
+        depends: 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
