@@ -3,6 +3,8 @@ use actix_web::HttpResponse;
 use actix_web::web::Path;
 use thiserror::Error;
 
+use common::test_http_endpoint;
+
 mod common;
 
 #[derive(ErrorResponse, Error, Debug)]

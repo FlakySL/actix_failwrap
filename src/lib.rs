@@ -10,6 +10,9 @@ mod helpers;
 mod macro_input;
 mod macro_output;
 
+#[cfg(test)]
+mod tests;
+
 #[proc_macro_derive(
     ErrorResponse,
     attributes(default_status_code, status_code, transform_response)

@@ -9,7 +9,7 @@ test_format:
 	cargo +nightly fmt --all -- --check
 
 coverage:
-	coverage=$$(cargo llvm-cov -- --nocapture --test-threads=1 --color=always 2>/dev/null | grep '^TOTAL' | awk '{print $$10}'); \
+	coverage=$$(cargo llvm-cov -- --nocapture --color=always 2>/dev/null | grep '^TOTAL' | awk '{print $$10}'); \
 	echo "coverage=$$coverage";
 
 ifdef export
@@ -18,6 +18,6 @@ ifdef export
 	else \
 		EXPORT_PATH="$(export)"; \
 	fi; \
-	cargo llvm-cov --lcov -- --nocapture --test-threads=1 --color=always > $$EXPORT_PATH 2>/dev/null; \
+	cargo llvm-cov --lcov -- --nocapture --color=always > $$EXPORT_PATH 2>/dev/null; \
 	echo "export_path=$$EXPORT_PATH" >&2
 endif

@@ -2,6 +2,8 @@ use actix_failwrap::{ErrorResponse, proof_route};
 use actix_web::{HttpResponse, HttpResponseBuilder};
 use thiserror::Error;
 
+use common::test_http_endpoint;
+
 mod common;
 
 fn error_to_header(mut code: HttpResponseBuilder, format: String) -> HttpResponse {

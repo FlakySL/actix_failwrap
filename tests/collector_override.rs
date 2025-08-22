@@ -4,6 +4,8 @@ use actix_web::web::{Json, Query};
 use serde::Deserialize;
 use thiserror::Error;
 
+use common::test_http_endpoint;
+
 mod common;
 
 #[derive(Deserialize)]

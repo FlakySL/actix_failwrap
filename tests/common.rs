@@ -1,5 +1,6 @@
+
 // NOTE: this macro can be used to generate a test for a specific endpoint.
-#[macro_export]
+#[allow(unused_macros)]
 macro_rules! test_http_endpoint {
     (
         test $endpoint:ident as $test_name:ident
@@ -99,3 +100,6 @@ macro_rules! test_http_endpoint {
         }
     };
 }
+
+#[allow(unused)]
+pub(crate) use test_http_endpoint;
