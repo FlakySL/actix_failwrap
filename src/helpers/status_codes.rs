@@ -24,6 +24,7 @@ static STATUS_CODES: &[(usize, &str)] = &[
     (422, "UnprocessableEntity"),
     (423, "Locked"),
     (424, "FailedDependency"),
+    (425, "TooEarly"),
     (426, "UpgradeRequired"),
     (428, "PreconditionRequired"),
     (429, "TooManyRequests"),
@@ -59,9 +60,10 @@ pub fn is_status_supported(target_status: &str) -> bool {
         .any(|(_, supported_status)| &target_status == supported_status)
 }
 
-pub fn closest_status(target_status: &str) -> Option<&str> {
+pub fn closest_status(target_status: &str) -> &str {
     STATUS_CODES
         .iter()
         .min_by_key(|(_, supported_status)| levenshtein(supported_status, target_status))
         .map(|(_, supported_status)| *supported_status)
+        .unwrap_or("unreachable!()")
 }

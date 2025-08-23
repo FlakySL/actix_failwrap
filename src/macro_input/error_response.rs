@@ -17,6 +17,7 @@ use crate::helpers::status_codes::{
 };
 use crate::helpers::unique_attr::get_single_attr;
 
+#[derive(Debug)]
 pub struct ErrorResponse {
     enum_name: Ident,
     default_status_code: Ident,        // by default 500. Dynamic
@@ -24,11 +25,13 @@ pub struct ErrorResponse {
     variants: Vec<ErrorResponseVariant>,
 }
 
+#[derive(Debug)]
 pub struct ErrorResponseVariant {
     status_code: Option<Ident>,
     variant: EnumVariant,
 }
 
+#[derive(Debug)]
 pub struct StatusCode(Ident);
 
 impl ErrorResponse {
@@ -166,13 +169,10 @@ impl Parse for StatusCode {
                     format!(
                         concat!(
                             "Only HTTP error statuses are allowed. ",
-                            "{} is not a valid status code{}"
+                            "{} is not a valid status code, did you mean {}?"
                         ),
                         &ident_string,
-                        match closest_status(&ident_string) {
-                            Some(closest) => format!(", did you mean {closest}?"),
-                            None => String::new(),
-                        }
+                        closest_status(&ident_string)
                     ),
                 )),
             };

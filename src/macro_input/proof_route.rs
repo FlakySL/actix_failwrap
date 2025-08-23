@@ -17,11 +17,13 @@ use syn::{
 const HTTP_METHODS: [&str; 9] =
     ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "CONNECT", "TRACE"];
 
+#[derive(Debug)]
 pub struct ProofRouteMeta {
     method: String,
     path: String,
 }
 
+#[derive(Debug)]
 pub struct ProofRouteBody {
     name: Ident,
     parameters: Vec<ProofRouteParameter>,
@@ -29,6 +31,7 @@ pub struct ProofRouteBody {
     function: ItemFn,
 }
 
+#[derive(Debug)]
 pub struct ProofRouteParameter {
     error_override: Option<Expr>,
     ty: Type,
@@ -230,17 +233,7 @@ impl Parse for ProofRouteBody {
                         }
                     },
 
-                    PathArguments::Parenthesized(_) => {
-                        return Err(SynError::new_spanned(
-                            ty,
-                            concat!(
-                                "A proof handler can only return a Result<HttpResponse, ?>. ",
-                                "The actual return type seems to be function-like."
-                            ),
-                        ));
-                    },
-
-                    PathArguments::None => {
+                    PathArguments::None | PathArguments::Parenthesized(_) => {
                         return Err(SynError::new_spanned(
                             ty,
                             concat!(

@@ -43,7 +43,7 @@ in the `actix_failwrap` crate.
 
 This project uses GNU [make](https://www.gnu.org/software/make/).
 
-- Run tests using `make test`.
+- Run tests using `make test_code`, for more information, check each test folder README.
 - Compile the project using `make build`.
 
 ## Code of Conduct
