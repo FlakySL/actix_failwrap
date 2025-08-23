@@ -11,11 +11,11 @@ test_format:
 	cargo +nightly fmt --all -- --check
 
 coverage:
-	coverage=$$(cargo llvm-cov -- --nocapture --color=always 2>/dev/null | grep '^TOTAL' | awk '{print $$10}');
+	coverage=$$(cargo llvm-cov -- --nocapture 2>/dev/null | grep '^TOTAL' | awk '{print $$10}');
 	
 	if [ -z "$$coverage" ]
 	then
-		echo "Tests failed."
+		echo "Tests failed.";
 		exit 1;
 	fi
 
