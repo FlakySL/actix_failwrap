@@ -1,10 +1,9 @@
 use actix_failwrap::{ErrorResponse, proof_route};
 use actix_web::HttpResponse;
 use actix_web::web::{Json, Query};
+use common::test_http_endpoint;
 use serde::Deserialize;
 use thiserror::Error;
-
-use common::test_http_endpoint;
 
 mod common;
 

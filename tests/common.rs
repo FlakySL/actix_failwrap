@@ -1,4 +1,3 @@
-
 // NOTE: this macro can be used to generate a test for a specific endpoint.
 #[allow(unused_macros)]
 macro_rules! test_http_endpoint {

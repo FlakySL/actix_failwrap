@@ -10,6 +10,12 @@ test_format:
 
 coverage:
 	coverage=$$(cargo llvm-cov -- --nocapture --color=always 2>/dev/null | grep '^TOTAL' | awk '{print $$10}'); \
+	if [ -z "$$coverage" ]
+	then
+		echo "Tests failed."
+		exit 1;
+	fi
+
 	echo "coverage=$$coverage";
 
 ifdef export

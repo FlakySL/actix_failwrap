@@ -1,8 +1,7 @@
 use actix_failwrap::{ErrorResponse, proof_route};
 use actix_web::{HttpResponse, HttpResponseBuilder};
-use thiserror::Error;
-
 use common::test_http_endpoint;
+use thiserror::Error;
 
 mod common;
 

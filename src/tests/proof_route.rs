@@ -1,5 +1,5 @@
-use syn::parse2;
 use quote::quote;
+use syn::parse2;
 
 use crate::{ProofRouteBody, ProofRouteMeta};
 
@@ -21,7 +21,7 @@ pub fn proof_route_body_actix_attributes_not_allowed() {
         #[get("/")]
         async fn x() {}
     })
-        .expect_err("Expected error no actix attributes allowed.");
+    .expect_err("Expected error no actix attributes allowed.");
 }
 
 #[test]
@@ -29,7 +29,7 @@ pub fn proof_route_no_unit_type() {
     parse2::<ProofRouteBody>(quote! {
         async fn x() { () }
     })
-        .expect_err("Expected error no unit type allowed as return.");
+    .expect_err("Expected error no unit type allowed as return.");
 }
 
 #[test]
@@ -39,28 +39,28 @@ pub fn proof_route_only_result() {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect("Expected success as the return type is valid.");
+    .expect("Expected success as the return type is valid.");
 
     parse2::<ProofRouteBody>(quote! {
         async fn x() -> Result<HttpResponse, Error> {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect("Expected success as the return type is valid.");
+    .expect("Expected success as the return type is valid.");
 
     parse2::<ProofRouteBody>(quote! {
         async fn x() -> &Result<_, _> {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect_err("Expected error as a reference is returned.");
+    .expect_err("Expected error as a reference is returned.");
 
     parse2::<ProofRouteBody>(quote! {
         async fn x() -> BlahBlah<_, _> {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect_err("Expected error because a Result is not returned.");
+    .expect_err("Expected error because a Result is not returned.");
 }
 
 #[test]
@@ -70,28 +70,28 @@ pub fn proof_route_invalid_return_generics() {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect_err("Expected error because an invalid Result is returned.");
+    .expect_err("Expected error because an invalid Result is returned.");
 
     parse2::<ProofRouteBody>(quote! {
         async fn x() -> Result {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect_err("Expected error because the returned Result doesn't have any arguments.");
+    .expect_err("Expected error because the returned Result doesn't have any arguments.");
 
     parse2::<ProofRouteBody>(quote! {
         async fn x() -> Result<BlahBlah, Error> {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect_err("Expected error because the Result first argument isn't an HttpResponse.");
+    .expect_err("Expected error because the Result first argument isn't an HttpResponse.");
 
     parse2::<ProofRouteBody>(quote! {
         async fn x() -> Result<'a, Error> {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect_err("Expected error because the result arguments aren't all types.");
+    .expect_err("Expected error because the result arguments aren't all types.");
 }
 
 #[test]
@@ -101,7 +101,7 @@ pub fn proof_route_receiver_args() {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect("Expected success with receiver args.");
+    .expect("Expected success with receiver args.");
 }
 
 #[test]
@@ -111,5 +111,5 @@ pub fn proof_route_matching_arg_override() {
             Ok(HttpResponse::Ok().finish())
         }
     })
-        .expect_err("Expected error because expected the error override to be an expr.");
+    .expect_err("Expected error because expected the error override to be an expr.");
 }

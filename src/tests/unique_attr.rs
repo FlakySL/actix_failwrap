@@ -1,5 +1,5 @@
-use syn::{parse2, ItemFn};
 use quote::quote;
+use syn::{ItemFn, parse2};
 
 use crate::helpers::unique_attr::get_single_attr;
 
@@ -11,8 +11,20 @@ pub fn get_single_attr_test() {
         #[single]
         fn x() {}
     })
-        .expect("ItemFn to be parsed");
+    .expect("ItemFn to be parsed");
 
-    get_single_attr(function.attrs.clone(), "repeated").expect_err("Shouldn't be OK");
-    get_single_attr(function.attrs.clone(), "single").expect("Should be OK");
+    get_single_attr(
+        function
+            .attrs
+            .clone(),
+        "repeated",
+    )
+    .expect_err("Shouldn't be OK");
+    get_single_attr(
+        function
+            .attrs
+            .clone(),
+        "single",
+    )
+    .expect("Should be OK");
 }
