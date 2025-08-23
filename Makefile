@@ -11,7 +11,7 @@ test_format:
 	cargo +nightly fmt --all -- --check
 
 coverage:
-	coverage=$$(cargo llvm-cov -- --nocapture 2>/dev/null | grep '^TOTAL' | awk '{print $$10}');
+	coverage=$$(cargo llvm-cov -- --nocapture | grep '^TOTAL' | awk '{print $$10}');
 	
 	if [ -z "$$coverage" ]
 	then
