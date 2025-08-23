@@ -5,7 +5,7 @@
 [![Docs.rs][docs-badge]][docs]
 [![Downloads][downloads-badge]][downloads]
 [![Codecov][codecov-badge]][codecov]
-![tests][tests-badge]
+![[tests][tests-badge]][codecov]
 [![Discord][discord-badge]][discord]
 
 `actix_failwrap` */ˈæk.tɪks ˈfeɪl.ræp/* ("*aktiks fail-rap*") A micro-package that enables ergonomic **error propagation** (via [`thiserror`][thiserror]) inside Actix Web route handlers.
