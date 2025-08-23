@@ -1,4 +1,5 @@
 .ONESHELL:
+SHELL := /bin/bash
 
 .SILENT: test_code
 .SILENT: test_format
