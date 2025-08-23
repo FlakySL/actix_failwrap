@@ -1,8 +1,9 @@
-name: publish to crates.io
+name: publish
 
 on:
   workflow_run:
-    workflows: ["020-tests"]
+    workflows:
+      - tests
     types:
       - completed
 
