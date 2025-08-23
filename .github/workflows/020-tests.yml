@@ -26,11 +26,12 @@ jobs:
 
       - name: Install cargo-llvm-cov
         run: |
-          cargo binstall cargo-llvm-cov -y
+          cargo binstall cargo-llvm-cov --force -y
 
       - name: Generate coverage and get percentage
         id: coverage
         run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
           set -o pipefail
           coverage="$(make coverage export="./coverage.lcov" | grep "^coverage=" | head -n1 | cut -d '=' -f 2)";
           echo "coverage_percentage=${coverage%\%}" >> $GITHUB_OUTPUT;
