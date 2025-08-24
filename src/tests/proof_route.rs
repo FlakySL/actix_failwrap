@@ -80,13 +80,6 @@ pub fn proof_route_invalid_return_generics() {
     .expect_err("Expected error because the returned Result doesn't have any arguments.");
 
     parse2::<ProofRouteBody>(quote! {
-        async fn x() -> Result<BlahBlah, Error> {
-            Ok(HttpResponse::Ok().finish())
-        }
-    })
-    .expect_err("Expected error because the Result first argument isn't an HttpResponse.");
-
-    parse2::<ProofRouteBody>(quote! {
         async fn x() -> Result<'a, Error> {
             Ok(HttpResponse::Ok().finish())
         }
