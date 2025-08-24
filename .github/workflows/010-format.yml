@@ -21,9 +21,8 @@ jobs:
           toolchain: nightly
           components: rustfmt, clippy
 
-#      clippy is broken, claims syn types don't implement debug
-#      - name: Test clippy lints
-#        run: cargo clippy --all -- -D warnings
+      - name: Test clippy lints
+        run: cargo clippy --all
 
       - name: Test format
         run: cargo +nightly fmt --all --check

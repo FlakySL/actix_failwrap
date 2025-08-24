@@ -14,25 +14,22 @@ pub fn get_single_attr<I: IntoIterator<Item = Attribute>>(
         })
         .collect::<Vec<_>>();
 
-    match attributes.len() {
-        ..=1 => Ok(attributes
+    if let ..=1 = attributes.len() {
+        Ok(attributes
             .first()
-            .cloned()),
+            .cloned())
+    } else {
+        let mut extra_attrs_iter = attributes.iter();
 
-        2.. => {
-            let mut extra_attrs_iter = attributes.iter();
-
-            let extra_attr_spans = extra_attrs_iter
-                .next()
-                .map(|first| {
-                    extra_attrs_iter.fold(first.span(), |acc, curr| {
-                        acc.join(curr.span())
-                            .unwrap_or(acc)
-                    })
+        let extra_attr_spans = extra_attrs_iter
+            .next()
+            .map_or_else(Span::call_site, |first| {
+                extra_attrs_iter.fold(first.span(), |acc, curr| {
+                    acc.join(curr.span())
+                        .unwrap_or(acc)
                 })
-                .unwrap_or_else(Span::call_site);
+            });
 
-            Err(SynError::new(extra_attr_spans, format!("{ident} attribute is allowed only once.")))
-        },
+        Err(SynError::new(extra_attr_spans, format!("{ident} attribute is allowed only once.")))
     }
 }

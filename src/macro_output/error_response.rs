@@ -20,7 +20,7 @@ fn variant_match_head(variant: &ErrorResponseVariant) -> TokenStream2 {
     quote! { Self::#variant_name #variant_head_type => }
 }
 
-pub fn error_response_output(input: ErrorResponse) -> TokenStream2 {
+pub fn error_response_output(input: &ErrorResponse) -> TokenStream2 {
     let enum_name = input.enum_name();
 
     let (http_response_variants, error_variants) = input
@@ -38,21 +38,21 @@ pub fn error_response_output(input: ErrorResponse) -> TokenStream2 {
                 ::actix_web::HttpResponse::#status_code()
             };
 
-            http_response_variant.append_all(match input.transform_response() {
-                // We or either pass the variant trough transformer_fn
-                Some(transformer_fn) => quote! {{
-                    let transformed: ::actix_web::HttpResponse // type checking.
-                        = #transformer_fn(#http_response_tokens, self.to_string());
+            http_response_variant.append_all(
+                if let Some(transformer_fn) = input.transform_response() {
+                    quote! {{
+                        let transformed: ::actix_web::HttpResponse // type checking.
+                            = #transformer_fn(#http_response_tokens, self.to_string());
 
-                    transformed
-                }},
-
-                // Or if none we directly construct it.
-                None => quote! {
-                    #http_response_tokens
-                        .body(self.to_string())
+                        transformed
+                    }}
+                } else {
+                    quote! {
+                        #http_response_tokens
+                            .body(self.to_string())
+                    }
                 },
-            });
+            );
 
             let mut error_variant = variant_head.clone();
             let error_variant_ident = format_ident!("Error{status_code}");

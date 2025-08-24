@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use quote::format_ident;
 use syn::parse::{Parse, ParseStream};
 use syn::{
@@ -35,23 +37,23 @@ pub struct ErrorResponseVariant {
 pub struct StatusCode(Ident);
 
 impl ErrorResponse {
-    #[inline(always)]
+    #[inline]
     pub fn enum_name(&self) -> &Ident {
         &self.enum_name
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn default_status_code(&self) -> &Ident {
         &self.default_status_code
     }
 
-    #[inline(always)]
+    #[inline]
     pub const fn transform_response(&self) -> Option<&Ident> {
         self.transform_response
             .as_ref()
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn variants(&self) -> &[ErrorResponseVariant] {
         &self.variants
     }
@@ -71,7 +73,7 @@ impl Parse for ErrorResponse {
         )?
         .map(|attr| attr.parse_args::<StatusCode>())
         .transpose()?
-        .map(|code| code.into_inner())
+        .map(StatusCode::into_inner)
         .unwrap_or(format_ident!("InternalServerError"));
 
         let transform_response = get_single_attr(input.attrs, "transform_response")?
@@ -91,7 +93,7 @@ impl Parse for ErrorResponse {
                     )?
                     .map(|attr| attr.parse_args::<StatusCode>())
                     .transpose()?
-                    .map(|code| code.into_inner()),
+                    .map(StatusCode::into_inner),
                     variant,
                 })
             })
@@ -114,13 +116,13 @@ impl Parse for ErrorResponse {
 }
 
 impl ErrorResponseVariant {
-    #[inline(always)]
+    #[inline]
     pub const fn status_code(&self) -> Option<&Ident> {
         self.status_code
             .as_ref()
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn variant(&self) -> &EnumVariant {
         &self.variant
     }
@@ -151,8 +153,10 @@ impl Parse for StatusCode {
                         ),
                         allowed_status_pairs()
                             .iter()
-                            .map(|(code, status)| format!("{code} -> {status}\n"))
-                            .collect::<String>()
+                            .fold(String::new(), |mut res, (code, status)| {
+                                writeln!(res, "{code} -> {status}").ok();
+                                res
+                            })
                     ),
                 )
             })?;
@@ -162,9 +166,10 @@ impl Parse for StatusCode {
 
         if let Ok(ident) = input.parse::<Ident>() {
             let ident_string = ident.to_string();
-            return match is_status_supported(&ident_string) {
-                true => Ok(StatusCode(ident)),
-                false => Err(SynError::new_spanned(
+            return if is_status_supported(&ident_string) {
+                Ok(StatusCode(ident))
+            } else {
+                Err(SynError::new_spanned(
                     ident,
                     format!(
                         concat!(
@@ -174,7 +179,7 @@ impl Parse for StatusCode {
                         &ident_string,
                         closest_status(&ident_string)
                     ),
-                )),
+                ))
             };
         }
 

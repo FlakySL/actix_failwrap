@@ -3,7 +3,7 @@ use quote::{format_ident, quote};
 
 use crate::macro_input::proof_route::{ProofRouteBody, ProofRouteMeta};
 
-pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenStream2 {
+pub fn proof_route_output(meta: &ProofRouteMeta, body: &ProofRouteBody) -> TokenStream2 {
     let http_method = format_ident!(
         "{}",
         meta.method()
@@ -13,7 +13,7 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
 
     let handler_name = body.name();
     let handler_function = body.function();
-    let handler_err_type = body.return_error();
+    let (return_success, return_error) = body.return_result_semantics();
 
     let parameters = body.parameters();
     let parameters = parameters
@@ -22,13 +22,12 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
         .fold(Vec::with_capacity(parameters.len()), |mut acc, (idx, curr)| {
             let var_name = format_ident!("__{idx}");
             let ty = curr.ty();
-            let error_override = match curr.error_override() {
-                Some(error) => quote! { Err(_) => {
-                    // limited for cleanness.
-                    let error: #handler_err_type = #handler_err_type::#error;
-                    return error.into();
-                } },
-                None => quote! { Err(error) => return error.into() },
+            let error_override = if let Some(error) = curr.error_override() {
+                quote! { Err(_) => {
+                    return #return_error::#error.into();
+                } }
+            } else {
+                quote! { Err(error) => return error.into() }
             };
 
             acc.push(quote! {
@@ -50,6 +49,14 @@ pub fn proof_route_output(meta: ProofRouteMeta, body: ProofRouteBody) -> TokenSt
             __request: ::actix_web::HttpRequest,
             __payload: ::actix_web::web::Payload
         ) -> impl ::actix_web::Responder {
+            #[doc(hidden)]
+            fn __validate_ret_type<
+                T: ::actix_web::Responder,
+                E: ::std::convert::Into<::actix_web::HttpResponse>>()
+            {}
+
+            __validate_ret_type::<#return_success, #return_error>();
+
             #[doc(hidden)]
             #handler_function
 

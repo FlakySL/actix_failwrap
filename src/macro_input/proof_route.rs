@@ -1,18 +1,18 @@
-use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 use syn::{
+    Attribute,
     Error as SynError,
     Expr,
     FnArg,
-    GenericArgument,
     Ident,
     ItemFn,
     LitStr,
-    PathArguments,
     Result as SynResult,
     ReturnType,
     Type,
 };
+
+use crate::helpers::semantics::has_result_semantics;
 
 const HTTP_METHODS: [&str; 9] =
     ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "CONNECT", "TRACE"];
@@ -27,7 +27,7 @@ pub struct ProofRouteMeta {
 pub struct ProofRouteBody {
     name: Ident,
     parameters: Vec<ProofRouteParameter>,
-    return_error: Type,
+    return_result_semantics: (Type, Type),
     function: ItemFn,
 }
 
@@ -38,12 +38,12 @@ pub struct ProofRouteParameter {
 }
 
 impl ProofRouteMeta {
-    #[inline(always)]
+    #[inline]
     pub fn method(&self) -> &str {
         &self.method
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn path(&self) -> &str {
         &self.path
     }
@@ -55,7 +55,7 @@ impl Parse for ProofRouteMeta {
 
         let Some((method, path)) = lit_str
             .value()
-            .split_once(" ")
+            .split_once(' ')
             .map(|(m, p)| (m.to_string(), p.to_string()))
         else {
             return Err(SynError::new_spanned(
@@ -85,22 +85,22 @@ impl Parse for ProofRouteMeta {
 }
 
 impl ProofRouteBody {
-    #[inline(always)]
+    #[inline]
     pub fn name(&self) -> &Ident {
         &self.name
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn parameters(&self) -> &[ProofRouteParameter] {
         &self.parameters
     }
 
-    #[inline(always)]
-    pub fn return_error(&self) -> &Type {
-        &self.return_error
+    #[inline]
+    pub fn return_result_semantics(&self) -> &(Type, Type) {
+        &self.return_result_semantics
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn function(&self) -> &ItemFn {
         &self.function
     }
@@ -134,120 +134,6 @@ impl Parse for ProofRouteBody {
             ));
         }
 
-        let return_error = match &function
-            .sig
-            .output
-        {
-            // If the return type is (), disallow with a custom message.
-            ReturnType::Default => {
-                return Err(SynError::new_spanned(
-                    &name,
-                    "A proof handler cannot return unit type (), it must return a \
-                     Result<HttpResponse, ?>.",
-                ));
-            },
-
-            // If it's a type check the type
-            ReturnType::Type(_, ty) => {
-                // If the type is not a path it may possibly not be an error
-                // so disallow.
-                let Type::Path(ty) = ty.as_ref() else {
-                    return Err(SynError::new_spanned(
-                        ty,
-                        concat!(
-                            "A proof handler cannot return pointers, references, dynamic types... ",
-                            "It must always return a Result<HttpResponse, ?>."
-                        ),
-                    ));
-                };
-
-                // If the last segment is not Result disallow,
-                // this can be spoofed with a type alias or another unrelated type,
-                // but will probably fail.
-                let Some(last_return_segment) = ty
-                    .path
-                    .segments
-                    .last()
-                    .take_if(|segment| segment.ident == "Result")
-                else {
-                    return Err(SynError::new_spanned(
-                        ty,
-                        "A proof handler can only return a Result<HttpResponse, ?>.",
-                    ));
-                };
-
-                match &last_return_segment.arguments {
-                    // The type arguments must be generics <>.
-                    PathArguments::AngleBracketed(arguments) => {
-                        // There must be two of them, not 0, 1 or 3
-                        if arguments
-                            .args
-                            .len()
-                            != 2
-                        {
-                            return Err(SynError::new_spanned(
-                                ty,
-                                "The provided Result type doesn't require 2 generic arguments.",
-                            ));
-                        }
-
-                        // Check the argument types
-                        match (&arguments.args[0], &arguments.args[1]) {
-                            // If the arguments are <_, Error> its "inferred".
-                            (GenericArgument::Type(Type::Infer(_)), GenericArgument::Type(err)) => {
-                                err.clone()
-                            },
-
-                            // If the arguments are <HttpResponse, Error> that's the target type.
-                            (
-                                GenericArgument::Type(Type::Path(res)),
-                                GenericArgument::Type(err),
-                            ) => {
-                                if !res
-                                    .path
-                                    .is_ident("HttpResponse")
-                                {
-                                    return Err(SynError::new_spanned(
-                                        res,
-                                        concat!(
-                                            "The provided route handler returns a Result. ",
-                                            "But this result's ok value isn't an HttpResponse"
-                                        ),
-                                    ));
-                                }
-
-                                // We don't use the "HttpResponse" tokens, we just asume them.
-                                err.clone()
-                            },
-
-                            // Any other thing, throw out.
-                            _ => {
-                                return Err(SynError::new_spanned(
-                                    ty,
-                                    concat!(
-                                        "The provided route handler returns a Result, ",
-                                        "but the generic constraints aren't all types."
-                                    ),
-                                ));
-                            },
-                        }
-                    },
-
-                    PathArguments::None | PathArguments::Parenthesized(_) => {
-                        return Err(SynError::new_spanned(
-                            ty,
-                            concat!(
-                                "A proof handler must return a Result<HttpResponse, ?>, while the ",
-                                "actual return type has Result as identifier, it doesn't contain ",
-                                "generic types... Are you sure you are using \
-                                 ::std::result::Result?"
-                            ),
-                        ));
-                    },
-                }
-            },
-        };
-
         let parameters = function
             .sig
             .inputs
@@ -266,23 +152,33 @@ impl Parse for ProofRouteBody {
                                 .path()
                                 .is_ident("error_override")
                         })
-                        .map(|attribute| attribute.parse_args::<Expr>())
+                        .map(Attribute::parse_args::<Expr>)
                         .transpose()
-                        .map_err(|err| {
-                            SynError::new(
-                                err.span(),
-                                format!("Expected a {} variant.", return_error.to_token_stream()),
-                            )
-                        })?,
+                        .map_err(|err| SynError::new(err.span(), "Expected an expression."))?,
                     ty: *parameter.ty,
                 })
             })
             .collect::<Result<Vec<_>, _>>()?;
 
-        for mut input in function
+        let output_match_err = SynError::new_spanned(
+            &function
+                .sig
+                .output,
+            "Expected a Result<T: actix_web::Responder, E: Into<actix_web::HttpResponse>>",
+        );
+
+        let (r_t, r_e) = if let ReturnType::Type(_, ty) = &function
+            .sig
+            .output
+        {
+            has_result_semantics(ty).ok_or(output_match_err)?
+        } else {
+            return Err(output_match_err);
+        };
+
+        for mut input in &mut function
             .sig
             .inputs
-            .iter_mut()
         {
             if let FnArg::Typed(typed) = &mut input {
                 typed
@@ -295,18 +191,23 @@ impl Parse for ProofRouteBody {
             }
         }
 
-        Ok(Self { name, parameters, return_error, function })
+        Ok(Self {
+            name,
+            parameters,
+            return_result_semantics: (r_t.clone(), r_e.clone()),
+            function,
+        })
     }
 }
 
 impl ProofRouteParameter {
-    #[inline(always)]
+    #[inline]
     pub const fn error_override(&self) -> Option<&Expr> {
         self.error_override
             .as_ref()
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn ty(&self) -> &Type {
         &self.ty
     }

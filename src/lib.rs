@@ -1,3 +1,7 @@
+#![deny(warnings)]
+#![warn(clippy::pedantic)]
+#![warn(clippy::unwrap_used)]
+
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
 
@@ -18,14 +22,14 @@ mod tests;
     attributes(default_status_code, status_code, transform_response)
 )]
 pub fn error_response(input: TokenStream) -> TokenStream {
-    error_response_output(parse_macro_input!(input as ErrorResponse)).into()
+    error_response_output(&parse_macro_input!(input as ErrorResponse)).into()
 }
 
 #[proc_macro_attribute]
 pub fn proof_route(meta: TokenStream, body: TokenStream) -> TokenStream {
     proof_route_output(
-        parse_macro_input!(meta as ProofRouteMeta),
-        parse_macro_input!(body as ProofRouteBody),
+        &parse_macro_input!(meta as ProofRouteMeta),
+        &parse_macro_input!(body as ProofRouteBody),
     )
     .into()
 }
