@@ -10,6 +10,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
 
@@ -65,6 +66,16 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
 
+      - name: Check if release exists
+        id: release_check
+        run: |
+          TAG=${{ steps.latest_tag.outputs.tag }}
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create and push new git tag
         if: steps.should_publish.outputs.publish == 'true'
         run: |
@@ -75,7 +86,7 @@ jobs:
 
       - name: Generate a changelog
         uses: orhun/git-cliff-action@v4
-        if: steps.should_publish.outputs.publish == 'true'
+        if: steps.release_check.outputs.exists == 'false'
         id: git-cliff
         with:
           config: cliff.toml
@@ -83,11 +94,11 @@ jobs:
 
       - name: Create Release
         uses: actions/create-release@v1
-        if: steps.should_publish.outputs.publish == 'true'
+        if: steps.release_check.outputs.exists == 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.crate_version_outputs.version }}
+          tag_name: ${{ steps.latest_tag.outputs.tag }}
           release_name: Release ${{ steps.crate_version.outputs.version }}
           body: ${{ steps.git-cliff.outputs.content }}
           draft: false
