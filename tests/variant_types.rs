@@ -1,3 +1,9 @@
+//! Variant Type Tests
+//!
+//! This tests all the types of variants an enum can have
+//! and their compatibility with the `ErrorResponse` derive
+//! macro.
+
 use actix_failwrap::{ErrorResponse, proof_route};
 use actix_web::HttpResponse;
 use actix_web::web::Path;

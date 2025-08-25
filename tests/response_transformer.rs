@@ -1,3 +1,9 @@
+//! Response Transformer Tests
+//!
+//! This tests whether the transformer function works correctly,
+//! by calling `GET /` on he boostrap server, the error
+//! should show up on the headers.
+
 use actix_failwrap::{ErrorResponse, proof_route};
 use actix_web::{HttpResponse, HttpResponseBuilder};
 use common::test_http_endpoint;

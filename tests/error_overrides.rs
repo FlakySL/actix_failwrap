@@ -1,3 +1,10 @@
+//! Error Override tests
+//!
+//! This test checks whether the `#[default_status_code(..)]`
+//! attribute works correctly. For the `GeneralOverride`
+//! test, this should return a 400 status code and for the
+//! `SpecificOverride` it should return 404.
+
 use actix_failwrap::{ErrorResponse, proof_route};
 use actix_web::HttpResponse;
 use actix_web::web::Path;

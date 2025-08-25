@@ -1,3 +1,12 @@
+//! Collector Override Tests
+//!
+//! This file tests how do collector overrides behave,
+//! they should replace the original [`Query`] and [`Json`]
+//! errors by [`CouldNotParseQuery`] and [`CouldNotParseBody`].
+//!
+//! [`CouldNotParseQuery`]: TestError::CouldNotParseQuery
+//! [`CouldNotParseBody`]: TestError::CouldNotParseBody
+
 use actix_failwrap::{ErrorResponse, proof_route};
 use actix_web::HttpResponse;
 use actix_web::web::{Json, Query};
