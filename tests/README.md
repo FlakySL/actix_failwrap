@@ -24,7 +24,7 @@ HTTP server and sends a request to it, this for the sake of testing an actix_web
 handler.
 
 An example use for the macro is the following
-```rust
+```rust ignore
 /* incomplete handler example */
 async fn handler() -> impl Responder;
 

@@ -80,7 +80,7 @@ This example shows a login route in Actix Web using `actix_failwrap`.
 In your project you may have a module that declares models, in this case a `User` model.
 In that file you may declare your [`thiserror`][thiserror] error that you may re-use for your handler.
 
-```rust
+```rust ignore
 use serde::{Serialize, Deserialize};
 use actix_failwrap::ErrorResponse;
 use thiserror::Error;
@@ -97,7 +97,7 @@ fn error_to_header(mut response: HttpResponseBuilder, error: String) -> HttpResp
 // if the attribute is not present, the default status code will be 500.
 #[default_status_code(InternalServerError)]
 // Function used to transform the final HttpResponse,
-if the attribute not present, the Display is mapped to the body.
+// if the attribute not present, the Display is mapped to the body.
 #[transform_response(error_to_header)]
 pub enum UserError {
   #[error("Either the email or the password is invalid. Please check the input credentials")]
@@ -125,7 +125,7 @@ pub fn obtain_user(credentials: UserCredentials) -> Result<User, UserError> {
 And another module that declares handlers, this example handler obtains a user
 with some credentials and returns its JWT token if successful.
 
-```rust
+```rust ignore
 use actix_failwrap::proof_route;
 use actix_web::{web::Form, HttpResponse, HttpResponseBuilder};
 
@@ -181,25 +181,25 @@ allowing direct propagation with the `?` operator in handlers.
 
 Simplifies route definition and error propagation.
 
-```rust
+```rust ignore
 #[proof_route("POST /path")]
 ```
 
 Expands to:
 
-```rust
+```rust ignore
 #[actix_web::post("/path")]
 ```
 
 An example function signature looks like
 
-```rust
+```rust ignore
 #[proof_route("GET /users")]
 async fn get_users() -> Result<HttpResponse, Error> {}
 ```
 
 > [!TIP]
-> You can use a `Result<impl Responder, Error>` instead of `HttpResponse`.
+> You can use a `Result<T: actix_web::Responder, Error>` instead of `HttpResponse`.
 
 Allows you to:
 
