@@ -1,9 +1,20 @@
+//! [`ErrorResponse`] Output Module
+//!
+//! Declares the macro generation functions,
+//! abstracting the macro generation instead
+//! of declaring it into the main module.
+
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{TokenStreamExt, format_ident, quote};
 use syn::Fields as VariantFields;
 
 use crate::macro_input::error_response::{ErrorResponse, ErrorResponseVariant};
 
+/// **variant_match_head()**
+///
+/// Generates an 'ignore all' head depending on the
+/// provided enum variant. Returns a [`TokenStream2`]
+/// with the generated head.
 fn variant_match_head(variant: &ErrorResponseVariant) -> TokenStream2 {
     let variant_name = &variant
         .variant()
@@ -20,6 +31,9 @@ fn variant_match_head(variant: &ErrorResponseVariant) -> TokenStream2 {
     quote! { Self::#variant_name #variant_head_type => }
 }
 
+/// **error_response_output()**
+///
+/// Generates the [`ErrorResponse`] macro output.
 pub fn error_response_output(input: &ErrorResponse) -> TokenStream2 {
     let enum_name = input.enum_name();
 

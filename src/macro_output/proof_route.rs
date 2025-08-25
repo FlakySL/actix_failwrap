@@ -1,8 +1,21 @@
+//! [`proof_route`] Output Module
+//!
+//! Declares the macro generation functions,
+//! abstracting the macro generation instead
+//! of declaring it into the main module.
+//!
+//! [`proof_route`]: crate::proof_route
+
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 
 use crate::macro_input::proof_route::{ProofRouteBody, ProofRouteMeta};
 
+/// **proof_route_output()**
+///
+/// Generates the [`proof_route`] macro output.
+///
+/// [`proof_route`]: crate::proof_route
 pub fn proof_route_output(meta: &ProofRouteMeta, body: &ProofRouteBody) -> TokenStream2 {
     let http_method = format_ident!(
         "{}",
