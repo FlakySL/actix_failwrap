@@ -10,7 +10,7 @@ use syn::Fields as VariantFields;
 
 use crate::macro_input::error_response::{ErrorResponse, ErrorResponseVariant};
 
-/// **variant_match_head()**
+/// **`variant_match_head()`**
 ///
 /// Generates an 'ignore all' head depending on the
 /// provided enum variant. Returns a [`TokenStream2`]
@@ -31,7 +31,7 @@ fn variant_match_head(variant: &ErrorResponseVariant) -> TokenStream2 {
     quote! { Self::#variant_name #variant_head_type => }
 }
 
-/// **error_response_output()**
+/// **`error_response_output()`**
 ///
 /// Generates the [`ErrorResponse`] macro output.
 pub fn error_response_output(input: &ErrorResponse) -> TokenStream2 {

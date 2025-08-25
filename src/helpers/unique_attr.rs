@@ -7,7 +7,7 @@ use proc_macro2::Span;
 use syn::spanned::Spanned;
 use syn::{Attribute, Error as SynError};
 
-/// **get_single_attr()**
+/// **`get_single_attr()`**
 ///
 /// Gets a sole attribute from an attribute iterator
 /// or a pre-formatted [`SynError`] if many or 0 expected

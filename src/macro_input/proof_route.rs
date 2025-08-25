@@ -22,15 +22,15 @@ use syn::{
 
 use crate::helpers::semantics::has_result_semantics;
 
-/// **HTTP_METHODS**
+/// **`HTTP_METHODS`**
 ///
 /// An array of HTTP method string literals.
 const HTTP_METHODS: [&str; 9] =
     ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS", "CONNECT", "TRACE"];
 
-/// **ProofRouteMeta**
+/// **`ProofRouteMeta`**
 ///
-/// Metadata to crate the actix_web route inside the
+/// Metadata to crate the `actix_web` route inside the
 /// wrapper.
 #[derive(Debug)]
 pub struct ProofRouteMeta {
@@ -38,7 +38,7 @@ pub struct ProofRouteMeta {
     path: String,
 }
 
-/// **ProofRouteBody**
+/// **`ProofRouteBody`**
 ///
 /// Handler function metadata.
 #[derive(Debug)]
@@ -49,7 +49,7 @@ pub struct ProofRouteBody {
     function: ItemFn,
 }
 
-/// **ProofRouteMeta**
+/// **`ProofRouteMeta`**
 ///
 /// [`ProofRouteBody`] function input metadata.
 #[derive(Debug)]
@@ -59,16 +59,16 @@ pub struct ProofRouteParameter {
 }
 
 impl ProofRouteMeta {
-    /// **ProofRouteMeta.method**
+    /// **`ProofRouteMeta.method`**
     ///
     /// The HTTP status method compatible as an
-    /// actix_web method attribute macro.
+    /// `actix_web` method attribute macro.
     #[inline]
     pub fn method(&self) -> &str {
         &self.method
     }
 
-    /// **ProofRouteMeta.path**
+    /// **`ProofRouteMeta.path`**
     ///
     /// The HTTP path for this handler.
     #[inline]
@@ -113,7 +113,7 @@ impl Parse for ProofRouteMeta {
 }
 
 impl ProofRouteBody {
-    /// **ProofRouteBody.name**
+    /// **`ProofRouteBody.name`**
     ///
     /// The handler function original name.
     #[inline]
@@ -121,7 +121,7 @@ impl ProofRouteBody {
         &self.name
     }
 
-    /// **ProofRouteBody.parameters**
+    /// **`ProofRouteBody.parameters`**
     ///
     /// The handler function input parameters.
     #[inline]
@@ -129,7 +129,7 @@ impl ProofRouteBody {
         &self.parameters
     }
 
-    /// **ProofRouteBody.return_result_semantics**
+    /// **`ProofRouteBody.return_result_semantics`**
     ///
     /// The semantics ie. The output of [`has_result_semantics`]
     /// applied to the return type of the function.
@@ -138,7 +138,7 @@ impl ProofRouteBody {
         &self.return_result_semantics
     }
 
-    /// **ProofRouteBody.function**
+    /// **`ProofRouteBody.function`**
     ///
     /// A reference to the original unparsed function
     /// from the AST.
@@ -243,17 +243,17 @@ impl Parse for ProofRouteBody {
 }
 
 impl ProofRouteParameter {
-    /// **ProofRouteParameter.error_override**
+    /// **`ProofRouteParameter.error_override`**
     ///
     /// The error override for this collector if annotated
-    /// with `#[error_override]`, otherwise None.
+    /// with `#[error_override(..)]`, otherwise None.
     #[inline]
     pub const fn error_override(&self) -> Option<&Expr> {
         self.error_override
             .as_ref()
     }
 
-    /// **ProofRouteParameter.ty**
+    /// **`ProofRouteParameter.ty`**
     ///
     /// The collector type.
     #[inline]

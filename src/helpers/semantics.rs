@@ -5,7 +5,7 @@
 
 use syn::{GenericArgument, PathArguments, Type, TypePath};
 
-/// **has_result_semantics()**
+/// **`has_result_semantics()`**
 ///
 /// Parses the semantics for a `Result` like type
 /// and returns a tuple with the `T` and `E` parsed types.

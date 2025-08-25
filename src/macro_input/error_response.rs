@@ -25,7 +25,7 @@ use crate::helpers::status_codes::{
 };
 use crate::helpers::unique_attr::get_single_attr;
 
-/// **ErrorResponse**
+/// **`ErrorResponse`**
 ///
 /// Meta for the error response macro.
 #[derive(Debug)]
@@ -36,7 +36,7 @@ pub struct ErrorResponse {
     variants: Vec<ErrorResponseVariant>,
 }
 
-/// **ErrorResponseVariant**
+/// **`ErrorResponseVariant`**
 ///
 /// Meta for each error response annotated enum variant.
 #[derive(Debug)]
@@ -45,7 +45,7 @@ pub struct ErrorResponseVariant {
     variant: EnumVariant,
 }
 
-/// **StatusCode**
+/// **`StatusCode`**
 ///
 /// Parsed meta for HTTP status codes.
 ///
@@ -54,7 +54,7 @@ pub struct ErrorResponseVariant {
 pub struct StatusCode(Ident);
 
 impl ErrorResponse {
-    /// **ErrorResponse.enum_name**
+    /// **`ErrorResponse.enum_name`**
     ///
     /// The enum name for which this macro was applied.
     #[inline]
@@ -62,16 +62,16 @@ impl ErrorResponse {
         &self.enum_name
     }
 
-    /// **ErrorResponse.default_status_code**
+    /// **`ErrorResponse.default_status_code`**
     ///
-    /// The parsed default status code from `#[default_status_code]`
+    /// The parsed default status code from `#[default_status_code(..)]`
     /// if not found `InternalServerError`.
     #[inline]
     pub fn default_status_code(&self) -> &Ident {
         &self.default_status_code
     }
 
-    /// **ErrorResponse.transform_response**
+    /// **`ErrorResponse.transform_response`**
     ///
     /// The provided function identifier to transform the HTTP response
     /// if any.
@@ -81,7 +81,7 @@ impl ErrorResponse {
             .as_ref()
     }
 
-    /// **ErrorResponse.variants**
+    /// **`ErrorResponse.variants`**
     ///
     /// The annotated error enum variants.
     #[inline]
@@ -147,7 +147,7 @@ impl Parse for ErrorResponse {
 }
 
 impl ErrorResponseVariant {
-    /// **ErrorResponseVariant.status_code**
+    /// **`ErrorResponseVariant.status_code`**
     ///
     /// The status code override for the specific variant,
     /// if None the default should be used.
@@ -157,7 +157,7 @@ impl ErrorResponseVariant {
             .as_ref()
     }
 
-    /// **ErrorResponseVariant.variant**
+    /// **`ErrorResponseVariant.variant`**
     ///
     /// The original enum variant from the AST.
     #[inline]
@@ -167,7 +167,7 @@ impl ErrorResponseVariant {
 }
 
 impl StatusCode {
-    /// **StatusCode.into_inner()**
+    /// **`StatusCode.into_inner()`**
     ///
     /// Get the parsed HTTP status code as an ident
     /// compatible with appending to `actix_web::HttpResponse::`.

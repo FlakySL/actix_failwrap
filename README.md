@@ -1,4 +1,4 @@
-![actix_failwrap banner][banner]
+![`actix_failwrap` banner][banner]
 
 [![Crates.io][crate-badge]][crate]
 [![License][license-badge]][license]
@@ -24,30 +24,30 @@ This crate allows you to:
 - [Installation 📦](#installation-)
 - [Usage Example 🤔](#usage-example-)
 - [Exported macros 🔧](#exported-macros-)
-  - [ErrorResponse ⚙️](#deriveerrorresponse)
-  - [proof_route ⚙️](#proof_route)
+  - [`ErrorResponse` ⚙️](#deriveerrorresponse)
+  - [`proof_route` ⚙️](#proof_route)
 - [License 📜](#license-)
 
 ---
 
 ## Features 🚀
 
-- ✅ **Automatic error-to-response conversion** using [`thiserror`][thiserror] enums  
+- ✅ **Automatic error-to-response conversion** using [`thiserror`][thiserror] enums
   Define route errors with `#[derive(ErrorResponse)]` to auto-generate `HttpResponse`.
 
-- 🧩 **Custom response transformation per error enum**  
+- 🧩 **Custom response transformation per error enum**
   Use `#[transform_response(fn)]` to modify headers, body, or status codes.
 
-- 🧠 **Per-variant status code overrides**  
+- 🧠 **Per-variant status code overrides**
   Set status codes using `#[status_code(...)]` — supports both constants and numbers.
 
-- 🔁 **Fallback behavior** for unannotated variants  
+- 🔁 **Fallback behavior** for unannotated variants
   Variants without `#[status_code]` fall back to `#[default_status_code]` or HTTP 500.
 
-- ✍️ **Extractor error mapping with `#[error_override(...)]`**  
+- ✍️ **Extractor error mapping with `#[error_override(...)]`**
   Map deserialization or extractor failures to your own enum variant.
 
-- ⚡ **Minimal boilerplate route macros with `#[proof_route(...)]`**  
+- ⚡ **Minimal boilerplate route macros with `#[proof_route(...)]`**
   Use `?` with error enums directly and skip [`actix_web`][actix-web] macro imports.
 
 ---

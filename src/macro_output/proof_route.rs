@@ -11,7 +11,7 @@ use quote::{format_ident, quote};
 
 use crate::macro_input::proof_route::{ProofRouteBody, ProofRouteMeta};
 
-/// **proof_route_output()**
+/// **`proof_route_output()`**
 ///
 /// Generates the [`proof_route`] macro output.
 ///
