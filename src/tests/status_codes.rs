@@ -1,7 +1,21 @@
+//! Status Code Literal Tests
+//!
+//! This tests whtether the literals declared in
+//! [`crate::helpers::status_codes`] return
+//! the correct results.
+//!
+//! *this is mostly done for coverage*
+
 use std::collections::HashMap;
 
 use crate::helpers::status_codes::{allowed_status_pairs, closest_status, is_status_supported};
 
+/// Allowed Status Pairs Getter
+///
+/// Tests whtether the allowed status pairs getter
+/// gets the correct values.
+///
+/// -- redundant asf.
 #[test]
 pub fn allowed_status_pairs_getter() {
     fn find_status(pairs: &'static [(usize, &'static str)], code: usize) -> Option<&'static str> {
@@ -72,6 +86,10 @@ pub fn allowed_status_pairs_getter() {
     }
 }
 
+/// Only Supported Status Codes
+///
+/// Tests whtether only the valid status codes
+/// are included in the status codes array.
 #[test]
 pub fn supported_status_codes() {
     const STATUS_TEST: [(&'static str, bool); 62] = [
@@ -144,6 +162,10 @@ pub fn supported_status_codes() {
     }
 }
 
+/// Closest Status Codes
+///
+/// Tests whtether the edit distance algorithm works
+/// and returns the expected corrections.
 #[test]
 pub fn closest_status_codes() {
     static SLIGHT_ERRORS: [(&'static str, &'static str); 39] = [
