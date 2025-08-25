@@ -122,7 +122,7 @@ pub fn error_response(input: TokenStream) -> TokenStream {
 ///
 /// **`#[error_override(EnumVariant)]`**
 ///
-/// You can also annotate your route collectors with the `error_override`
+/// You can also annotate your route extractors with the `error_override`
 /// attribute which expects a variant of the error enumerable being returned.
 /// This will replace any error that may be returned by the collector itself for
 /// a custom error variant instead.

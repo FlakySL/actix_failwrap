@@ -1,4 +1,4 @@
-//! Collector Override Tests
+//! Extractor Override Tests
 //!
 //! This file tests how do collector overrides behave,
 //! they should replace the original [`Query`] and [`Json`]
