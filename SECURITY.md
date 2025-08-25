@@ -1,8 +1,7 @@
 # Security Vulnerabilities
 
-**If you find any security issues, please reach out to any of the maintainers
-listed in our [governance.md].** We take all security reports seriously and
-will get back to you as soon as possible.
+**If you find any security issues, please reach out to [security@flaky.es]**
+We take all security reports seriously and will get back to you as soon as possible.
 
 We also have security measures in place by using automated tools for managing dependencies.
 Our project **strongly** relies on [dependabot] to:
@@ -17,3 +16,4 @@ latest versions of libraries to prevent security issues.
 
 [dependabot]: https://docs.github.com/en/code-security/dependabot
 [governance.md]: GOVERNANCE.md
+[security@flaky.es]: mailto:security@flaky.es

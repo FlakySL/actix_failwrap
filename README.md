@@ -26,6 +26,7 @@ This crate allows you to:
 - [Exported macros 🔧](#exported-macros-)
   - [`ErrorResponse` ⚙️](#deriveerrorresponse)
   - [`proof_route` ⚙️](#proof_route)
+- [Security 🔐](#security-)
 - [License 📜](#license-)
 
 ---
@@ -208,6 +209,15 @@ Allows you to:
 
 ---
 
+## Security 🔐
+
+Security is a top priority for us. If you believe you’ve found a security
+vulnerability, **do not open a public issue**. Instead, please read
+our [SECURITY.md](./SECURITY.md) policy and report it responsibly by
+contacting us at [security@flaky.es].
+
+---
+
 ## License 📜
 
 This repository is dual licensed, If your repository is open source, the library is free of use, otherwise contact [licensing@flaky.es] for a custom license for your use case.
@@ -222,6 +232,7 @@ For more information read the [license file][license].
 
 <!-- Contact information -->
 [licensing@flaky.es]: mailto:licensing@flaky.es
+[security@flaky.es]: mailto:security@flaky.es
 
 <!-- Repository banner -->
 [banner]: https://github.com/user-attachments/assets/15d5d3f2-3e78-49f2-8a09-b28b15bedd9f
