@@ -1,3 +1,9 @@
+//! [`ErrorResponse`] Input Module
+//!
+//! Declares meta structs that implement
+//! parsing methods for the [`ErrorResponse`]
+//! macro.
+
 use std::fmt::Write;
 
 use quote::format_ident;
@@ -19,6 +25,9 @@ use crate::helpers::status_codes::{
 };
 use crate::helpers::unique_attr::get_single_attr;
 
+/// **ErrorResponse**
+///
+/// Meta for the error response macro.
 #[derive(Debug)]
 pub struct ErrorResponse {
     enum_name: Ident,
@@ -27,32 +36,54 @@ pub struct ErrorResponse {
     variants: Vec<ErrorResponseVariant>,
 }
 
+/// **ErrorResponseVariant**
+///
+/// Meta for each error response annotated enum variant.
 #[derive(Debug)]
 pub struct ErrorResponseVariant {
     status_code: Option<Ident>,
     variant: EnumVariant,
 }
 
+/// **StatusCode**
+///
+/// Parsed meta for HTTP status codes.
+///
+/// XXX: Consider abstracting this.
 #[derive(Debug)]
 pub struct StatusCode(Ident);
 
 impl ErrorResponse {
+    /// **ErrorResponse.enum_name**
+    ///
+    /// The enum name for which this macro was applied.
     #[inline]
     pub fn enum_name(&self) -> &Ident {
         &self.enum_name
     }
 
+    /// **ErrorResponse.default_status_code**
+    ///
+    /// The parsed default status code from `#[default_status_code]`
+    /// if not found `InternalServerError`.
     #[inline]
     pub fn default_status_code(&self) -> &Ident {
         &self.default_status_code
     }
 
+    /// **ErrorResponse.transform_response**
+    ///
+    /// The provided function identifier to transform the HTTP response
+    /// if any.
     #[inline]
     pub const fn transform_response(&self) -> Option<&Ident> {
         self.transform_response
             .as_ref()
     }
 
+    /// **ErrorResponse.variants**
+    ///
+    /// The annotated error enum variants.
     #[inline]
     pub fn variants(&self) -> &[ErrorResponseVariant] {
         &self.variants
@@ -116,12 +147,19 @@ impl Parse for ErrorResponse {
 }
 
 impl ErrorResponseVariant {
+    /// **ErrorResponseVariant.status_code**
+    ///
+    /// The status code override for the specific variant,
+    /// if None the default should be used.
     #[inline]
     pub const fn status_code(&self) -> Option<&Ident> {
         self.status_code
             .as_ref()
     }
 
+    /// **ErrorResponseVariant.variant**
+    ///
+    /// The original enum variant from the AST.
     #[inline]
     pub fn variant(&self) -> &EnumVariant {
         &self.variant
@@ -129,6 +167,11 @@ impl ErrorResponseVariant {
 }
 
 impl StatusCode {
+    /// **StatusCode.into_inner()**
+    ///
+    /// Get the parsed HTTP status code as an ident
+    /// compatible with appending to `actix_web::HttpResponse::`.
+    #[inline]
     pub fn into_inner(self) -> Ident {
         self.0
     }
