@@ -1,7 +1,17 @@
+//! Attribute Count Helper
+//!
+//! This module declares helpers to ensure
+//! there are no duplicated attributes.
+
 use proc_macro2::Span;
 use syn::spanned::Spanned;
 use syn::{Attribute, Error as SynError};
 
+/// **get_single_attr()**
+///
+/// Gets a sole attribute from an attribute iterator
+/// or a pre-formatted [`SynError`] if many or 0 expected
+/// attributes were found.
 pub fn get_single_attr<I: IntoIterator<Item = Attribute>>(
     iter: I,
     ident: &str,

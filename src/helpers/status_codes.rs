@@ -1,5 +1,14 @@
+//! Status Code Literal Helpers
+//!
+//! Helpers for parsing literal status codes
+//! combining integers and identifiers.
+
 use strsim::levenshtein;
 
+/// **STATUS_CODES**
+///
+/// A constant array associating number
+/// status codes to their identifiers.
 static STATUS_CODES: &[(usize, &str)] = &[
     (400, "BadRequest"),
     (401, "Unauthorized"),
@@ -43,10 +52,17 @@ static STATUS_CODES: &[(usize, &str)] = &[
     (511, "NetworkAuthenticationRequired"),
 ];
 
+/// **allowed_status_pairs()**
+///
+/// A getter to the private **STATUS_CODES**.
 pub fn allowed_status_pairs() -> &'static [(usize, &'static str)] {
     STATUS_CODES
 }
 
+/// **code_to_status()**
+///
+/// Converts a numeric code to an identifier and returns
+/// Some if it could be converted, otherwise false.
 pub fn code_to_status(target_code: usize) -> Option<&'static str> {
     STATUS_CODES
         .iter()
@@ -54,12 +70,21 @@ pub fn code_to_status(target_code: usize) -> Option<&'static str> {
         .map(|(_, supported_status)| *supported_status)
 }
 
+/// **is_status_supported()**
+///
+/// Returns true if the `target_status` is supported
+/// by the crate, otherwise false.
 pub fn is_status_supported(target_status: &str) -> bool {
     STATUS_CODES
         .iter()
         .any(|(_, supported_status)| &target_status == supported_status)
 }
 
+/// **closest_status()**
+///
+/// Applies the edit distance algorithm to a typoed
+/// status code identifier and returns the most-likely
+/// to be status code.
 pub fn closest_status(target_status: &str) -> &str {
     STATUS_CODES
         .iter()
