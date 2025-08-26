@@ -22,7 +22,7 @@ proc-macro = true
 proc-macro2 = "1.0.96"
 quote = "1.0.40"
 strsim = "0.11.1"
-syn = { version = "2.0.100", features = ["full", "extra-traits"] }
+syn = { version = "2.0.106", features = ["full", "extra-traits"] }
 
 [dev-dependencies]
 actix-web = "4.11.0"
