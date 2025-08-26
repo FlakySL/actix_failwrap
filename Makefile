@@ -1,34 +1,42 @@
+null :=
+space := $(null) $(null)
+
 .ONESHELL:
 SHELL := /bin/bash
 
-.SILENT: test_code
-.SILENT: test_format
-.SILENT: coverage
+.SILENT:
 
-test_code:
+.PHONY: test-code
+test-code:
 	cargo test -- --nocapture --color=always
 
-test_format:
+.PHONY: test-format
+test-format:
 	cargo +nightly fmt --all -- --check
 
-coverage:
-	coverage=$$(cargo llvm-cov -- --nocapture | grep '^TOTAL' | awk '{print $$10}');
-	
+.PHONY: test-clippy
+test-clippy:
+	cargo +nightly clippy --all
+
+.PHONY: test-coverage-get
+test-coverage-get:
+	coverage=$$(cargo llvm-cov -- --nocapture  --quiet 2>/dev/null | grep '^TOTAL' | awk '{print $$10}');
+
 	if [ -z "$$coverage" ]
 	then
 		echo "Tests failed.";
 		exit 1;
 	fi
 
-	echo "coverage=$$coverage";
+	echo "$${coverage/%\%/ }";
 
-ifdef export
-	if [ "$(export)" = "_" ]; then
+.PHONY: test-coverage-export
+test-coverage-export:
+	if [ -z "$(export)" ]
+	then
 		EXPORT_PATH="./coverage.lcov";
 	else
 		EXPORT_PATH="$(export)";
 	fi;
 
-	cargo llvm-cov --lcov -- --nocapture --color=always > $$EXPORT_PATH 2>/dev/null;
-	echo "export_path=$$EXPORT_PATH" >&2
-endif
+	cargo llvm-cov --lcov -- --nocapture > $$EXPORT_PATH 2>/dev/null;
