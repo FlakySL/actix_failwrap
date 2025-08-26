@@ -1,3 +1,10 @@
+# This action will keep track of the current crate verision, the last
+# pushed git tag and determine whether the project should be deployed
+#
+# Additionally it will keep track whether THE LAST TAG has a release
+# assigned, if it doesn't unless otherwise specified it will attempt
+# to create one.
+
 name: publish
 
 on:
@@ -15,74 +22,80 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout code
+      - name: Set Up Environment
         uses: actions/checkout@v4
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions/setup-node@v4
         with:
+          # checkout
           fetch-depth: 0
 
-      - name: Set-up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
+          # rust
           toolchain: stable
-
-      - name: Set-up semver
         run: |
-          curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-          sudo apt install -y nodejs
-          npm install -g semver
-
-      - name: Get crate version
-        id: crate_version
-        run: |
-          VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Get latest git tag
-        id: latest_tag
-        run: |
-          TAG=$(git describe --tags --abbrev=0 || echo "")
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-
-      - name: Compare versions
-        id: should_publish
-        run: |
-          VERSION="${{ steps.crate_version.outputs.version }}"
-          TAG="${{ steps.latest_tag.outputs.tag }}"
-
-          if [ -z "$TAG" ]; then
-            TAG="0.0.0"
-          fi
-
-          if semver -r "> $TAG" "$VERSION"; then
-            echo "publish=true" >> $GITHUB_OUTPUT
-          else
-            echo "publish=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Publish to crates.io
-        if: steps.should_publish.outputs.publish == 'true'
-        run: |
-          cargo publish
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-
-      - name: Check if release exists
-        id: release_check
-        run: |
-          TAG=${{ steps.latest_tag.outputs.tag }}
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create and push new git tag
-        if: steps.should_publish.outputs.publish == 'true'
-        run: |
+          # checkout
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ steps.crate_version.outputs.version }}
-          git push origin ${{ steps.crate_version.outputs.version }}
+
+          # node
+          npm install -g semver
+
+
+      - name: Get And Parse Repository Versions
+        id: versions
+        run: |
+          # The version of the main crate which should be the first on the list in the workspace config.
+          echo "crate_version=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')" \
+            >> $GITHUB_OUTPUT;
+
+          # The last pushed git tag if any.
+          last_git_tag="$(git describe --tags --abbrev=0 || echo '')";
+          if [[ -z "$last_git_tag" ]]; then exit 0; fi;
+          echo "last_tag=$last_git_tag" >> $GITHUB_OUTPUT;
+
+
+      - name: Determine What Should Be Done
+        id: to_do
+        run: |
+          crate_version="${{ steps.versions.outputs.crate_version }}";
+          last_tag="${{ steps.verrsions.outputs.last_tag }}";
+
+          if [ -z "$last_tag" ]; then
+            last_tag="0.0.0"
+          fi
+
+          # Whether the crate should be published to crates.io
+          if semver -r "> $last_tag" "$crate_version"; then
+            echo "should_publish='true'" >> $GITHUB_OUTPUT
+          else
+            echo "should_publish='false'" >> $GITHUB_OUTPUT
+          fi
+
+          # Whether the last git tag has a release associated to it.
+          if ! gh release view "$last_tag" >/dev/null 2>&1; then
+            echo "should_release=true" >> $GITHUB_OUTPUT;
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT;
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Publish And Create A New Tag
+        if: steps.to_to.outputs.should_publish == 'true'
+        run: |
+          cargo publish;
+
+          # If cargo publish fails a new release won't be made.
+          # Make sure that it exits in case github actions doesn't halt.
+          if ! $?; then exit 1; fi
+
+          git tag ${{ steps.crate_version.outputs.version }};
+          git push origin ${{ steps.crate_version.outputs.version }};
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
       - name: Generate a changelog
         uses: orhun/git-cliff-action@v4
