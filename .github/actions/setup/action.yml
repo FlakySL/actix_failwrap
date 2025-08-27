@@ -1,0 +1,48 @@
+# This private action setups all the necessary to run on all the workflows.
+#
+# By default it installs rust considering the input 'rust-toolchain' to choose
+# which toolchain to install, then installs all the required rust packages.
+#
+# If there is an npm package specified then it also installs node along
+# the required packages.
+
+name: Setup Environment
+
+inputs:
+  rust-toolchain:
+    required: false
+    default: stable
+  rust-packages:
+    required: false
+  npm-packages:
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout Repository
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Configure GIT
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Setup Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: ${{ inputs.rust-toolchain }}
+
+    - name: Install Rust Packages
+      if: ${{ inputs.rust-packages != '' }}
+      run: cargo install ${{ inputs.rust-packages }}
+
+    - name: Setup Node
+      if: ${{ inputs.npm-packages != '' }}
+      uses: actions/setup-node@v4
+
+    - name: Install NPM Packages
+      if: ${{ inputs.npm-packages != '' }}
+      uses: npm install -g ${{ inputs.npm-packages }}
