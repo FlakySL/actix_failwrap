@@ -30,6 +30,7 @@ jobs:
         with:
           npm-packages: "semver"
 
+
       - name: Get And Parse Repository Versions
         id: versions
         if: success()
@@ -91,6 +92,7 @@ jobs:
         with:
           config: cliff.toml
           args: --verbose --latest --strip header
+
 
       - name: Create Release
         uses: actions/create-release@v1

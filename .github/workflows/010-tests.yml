@@ -1,9 +1,24 @@
+# This workflow decides whether a new version should be published,
+# basically by running tests, lints and version checks to ensure
+# everything is as it should be.
+#
+# This will fail in case
+# - Any of the past commits don't follow the conventional commits standard.
+# - Cargo Clippy reports a broken rule.
+# - Cargo Fmt reports a broken rule.
+# - Tests fail
+# - Code coverage reports < 80% coverage.
+#
+# For now this only runs on main and on linux, since this is a library,
+# once further standards are enforced this might change.
+
 name: tests
 
 on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
 
 jobs:
   tests:
@@ -12,21 +27,21 @@ jobs:
       actions: read
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set-up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Setup Environment
+        uses: ./.github/actions/setup
         with:
-          toolchain: stable
-          components: llvm-tools-preview
+          rust-toolchain: nightly
+          rust-components: llvm-tools-preview
+          rust-packages: cargo-llvm-cov
 
-      - name: Install cargo-binstall@latest
-        uses: cargo-bins/cargo-binstall@main
+      - name: Run Commit Linting Checks
 
-      - name: Install cargo-llvm-cov
+
+      - name: Run Code Linting Checks
         run: |
-          cargo binstall cargo-llvm-cov --force -y
+          cargo clippy --all
+          cargo fmt --all --check
+
 
       - name: Generate coverage and get percentage
         id: coverage
