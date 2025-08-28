@@ -26,6 +26,14 @@ jobs:
       contents: write
 
     steps:
+        # Need to checkout the repository before
+        # using composite action to setup.
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+
         # Setup the environment with default
         # programs and setup required packages.
       - name: Setup Environment
