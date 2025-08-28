@@ -44,6 +44,16 @@ jobs:
           rust-components: llvm-tools-preview rustfmt clippy
           rust-packages: cargo-llvm-cov
 
+
+        # Validate conventional commits from the
+        # current branch.
+      - name: Conventional Commit Validation
+        uses: ytanikin/pr-conventional-commits@1.4.0
+        with:
+          task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert"]'
+          add_label: 'false'
+
+
         # Run code lints and tests
       - name: Run Code Lint Checks And Tests
         run: |
