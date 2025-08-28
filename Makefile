@@ -1,6 +1,3 @@
-null :=
-space := $(null) $(null)
-
 .ONESHELL:
 SHELL := /bin/bash
 
