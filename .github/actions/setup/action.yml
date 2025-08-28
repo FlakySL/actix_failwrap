@@ -22,15 +22,23 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22.18.0"
+
+
     - name: Checkout Repository
-    - uses: actions/checkout@v4
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
 
     - name: Configure GIT
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
+
 
     - name: Setup Rust
       uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -38,15 +46,15 @@ runs:
         toolchain: ${{ inputs.rust-toolchain }}
         components: ${{ inputs.rust-components }}
 
+
+    - name: Set Rust Bin Environment Variable
+      run: echo "PATH=$HOME/.cargo/bin:$PATH" >> $GITHUB_ENV;
+
+
     - name: Install Rust Packages
       if: ${{ inputs.rust-packages != '' }}
-      run: cargo install --force -y ${{ inputs.rust-packages }}
+      run: cargo install --force -y ${{ inputs.rust-packages }};
 
-    - name: Setup Node
-      if: ${{ inputs.npm-packages != '' }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: "22.18.0"
 
     - name: Install NPM Packages
       if: ${{ inputs.npm-packages != '' }}

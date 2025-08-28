@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read
+    env:
 
     steps:
       - name: Setup Environment
@@ -34,19 +35,17 @@ jobs:
           rust-components: llvm-tools-preview
           rust-packages: cargo-llvm-cov
 
+
       - name: Run Code Linting Checks
         run: |
-          cargo clippy --all
-          cargo fmt --all --check
+          make test code;
+          make test format;
 
-      - name: Generate coverage and get percentage
-        id: coverage
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          set -o pipefail
-          coverage="$(make coverage export="./coverage.lcov" | grep "^coverage=" | head -n1 | cut -d '=' -f 2)";
-          echo "coverage_percentage=${coverage%\%}" >> $GITHUB_OUTPUT;
-          echo "Detected coverage: ${coverage}";
+
+      - name: Generate Code Coverage
+        if: github.ref == 'refs/heads/main'
+        run: make test coverage export;
+
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -58,11 +57,14 @@ jobs:
           slug: FlakySL/actix_failwrap
           verbose: true
 
+
       - name: Fail if overall coverage is below 80%
         run: |
-          if (( $(echo "${{ steps.coverage.outputs.coverage_percentage }} < 80" | bc -l) )); then
-            echo "❌ Coverage is below 80% (${{ steps.coverage.outputs.coverage_percentage }}%)"
+          coverage=$(make test coverage get)
+          if (( $coverage < 80 ))
+          then
+            echo "❌ Coverage is below 80% ($coverage%)"
             exit 1
           else
-            echo "✅ Coverage meets requirement (${{ steps.coverage.outputs.coverage_percentage }}%)"
+            echo "✅ Coverage meets requirement ($coverage%)"
           fi
