@@ -25,9 +25,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read
-    env:
 
     steps:
+        # Setup the environment with default
+        # programs and setup required packages.
       - name: Setup Environment
         uses: ./.github/actions/setup
         with:
@@ -36,17 +37,26 @@ jobs:
           rust-packages: cargo-llvm-cov
 
 
-      - name: Run Code Linting Checks
+        # Run code lints and tests
+      - name: Run Code Lint Checks And Tests
         run: |
           make test code;
           make test format;
 
 
+        # Generate code coverage, this only
+        # happens in main because its the only
+        # branch we consideer for coverage.
       - name: Generate Code Coverage
         if: github.ref == 'refs/heads/main'
         run: make test coverage export;
 
 
+        # Upload the coverage to codecov
+        # Only main is considered because
+        # codecov is known to fail on other
+        # branches due to branch protection
+        # rules.
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         if: github.ref == 'refs/heads/main'
@@ -58,6 +68,11 @@ jobs:
           verbose: true
 
 
+        # This is more relevant while merging.
+        # Since by merge rules we deny failed
+        # workflows, in the case where coverage is
+        # below 80% the workflow will fail thus
+        # The branch won't be able to be merged.
       - name: Fail if overall coverage is below 80%
         run: |
           coverage=$(make test coverage get)
