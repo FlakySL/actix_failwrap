@@ -48,10 +48,9 @@ jobs:
         # Validate conventional commits from the
         # current branch.
       - name: Conventional Commit Validation
-        uses: ytanikin/pr-conventional-commits@1.4.0
+        uses: webiny/action-conventional-commits@v1.3.0
         with:
-          task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert"]'
-          add_label: 'false'
+          allowed-commit-types: "feat,fix,docs,test,ci,refactor,perf,chore,revert"
 
 
         # Run code lints and tests
