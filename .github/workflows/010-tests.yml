@@ -48,7 +48,7 @@ jobs:
         # happens in main because its the only
         # branch we consideer for coverage.
       - name: Generate Code Coverage
-        if: github.ref == 'refs/heads/main'
+        if: success() && github.ref == 'refs/heads/main'
         run: make test coverage export;
 
 
@@ -59,7 +59,7 @@ jobs:
         # rules.
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
-        if: github.ref == 'refs/heads/main'
+        if: success() && github.ref == 'refs/heads/main'
         with:
           file: coverage.lcov
           fail_ci_if_error: true
