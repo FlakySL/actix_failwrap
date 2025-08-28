@@ -34,14 +34,10 @@ jobs:
           rust-components: llvm-tools-preview
           rust-packages: cargo-llvm-cov
 
-      - name: Run Commit Linting Checks
-
-
       - name: Run Code Linting Checks
         run: |
           cargo clippy --all
           cargo fmt --all --check
-
 
       - name: Generate coverage and get percentage
         id: coverage
