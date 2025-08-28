@@ -12,9 +12,6 @@ inputs:
   rust-toolchain:
     required: false
     default: stable
-  rust-targets:
-    required: false
-    default: ""
   rust-components:
     required: false
     default: ""
@@ -46,7 +43,6 @@ runs:
       with:
         toolchain: ${{ inputs.rust-toolchain }}
         components: ${{ inputs.rust-components }}
-        targets: ${{ inputs.rust-targets }}
 
 
     - name: Set Rust Bin Environment Variable
