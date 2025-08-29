@@ -6,32 +6,25 @@ SHELL := /bin/bash
 
 .SILENT:
 
-.DEFAULT:
-	joined=$(subst $(space),-,$(MAKECMDGOALS));
 
-	if [ "$$joined" = "$@" ]
-	then
-		echo "No rule for target '$@'.";
-		exit 1;
-	fi
-
-	if ! $(MAKE) -q $$joined >/dev/null 2>&1
-	then
-		echo "No rule for target '$(MAKECMDGOALS)'.";
-		exit 1;
-	fi
-	
-	$(MAKE) -s --no-print-directory $$joined;
-
-
+.PHONY: test-code
 test-code:
 	cargo test -- --nocapture --color=always
 
+
+.PHONY: test-format
 test-format:
 	cargo +nightly fmt --all -- --check
 
+
+.PHONY: test-clippy
+test-clippy:
+	cargo +nightly clippy --all
+
+
+.PHONY: test-coverage-get
 test-coverage-get:
-	coverage=$$(cargo llvm-cov -- --nocapture | grep '^TOTAL' | awk '{print $$10}');
+	coverage=$$(cargo llvm-cov -- --nocapture  --quiet 2>/dev/null | grep '^TOTAL' | awk '{print $$10}');
 
 	if [ -z "$$coverage" ]
 	then
@@ -39,8 +32,10 @@ test-coverage-get:
 		exit 1;
 	fi
 
-	echo "$$coverage";
+	echo "$${coverage/%\%/ }";
 
+
+.PHONY: test-coverage-export
 test-coverage-export:
 	if [ -z "$(export)" ]
 	then

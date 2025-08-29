@@ -14,10 +14,13 @@ inputs:
     default: stable
   rust-components:
     required: false
+    default: ""
   rust-packages:
     required: false
+    default: ""
   npm-packages:
     required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -29,6 +32,7 @@ runs:
 
 
     - name: Configure GIT
+      shell: bash
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -42,14 +46,18 @@ runs:
 
 
     - name: Set Rust Bin Environment Variable
-      run: echo "PATH=$HOME/.cargo/bin:$PATH" >> $GITHUB_ENV;
+      shell: bash
+      run: echo "PATH=$HOME/.cargo/bin:$PATH" >> $GITHUB_ENV
 
 
+    - uses: cargo-bins/cargo-binstall@main
     - name: Install Rust Packages
       if: ${{ inputs.rust-packages != '' }}
-      run: cargo install --force -y ${{ inputs.rust-packages }};
+      shell: bash
+      run: cargo binstall --force -y ${{ inputs.rust-packages }}
 
 
     - name: Install NPM Packages
       if: ${{ inputs.npm-packages != '' }}
-      uses: npm install -g ${{ inputs.npm-packages }}
+      shell: bash
+      run: npm install -g ${{ inputs.npm-packages }}
