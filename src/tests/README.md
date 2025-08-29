@@ -20,9 +20,12 @@ Adding unit tests must always be done when a helper function is added to the cod
 is being abstracted, this project uses `cargo-llvm-cov` and expects a coverage of at least 80%
 which is mostly accomplished with unitary testing.
 
+You can know how much coverage you accomplished by running `make test-coverage-get`,
+which will print the percentage directly.
+
 ## Running The Tests
 
-This project uses make for some command recipes. You can run `make test_code` and it will
+This project uses make for some command recipes. You can run `make test-code` and it will
 test the application using the correct parameters.
 
 It is not recommended to rely on `cargo test` because parameters may change depending

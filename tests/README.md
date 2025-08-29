@@ -70,9 +70,12 @@ you may create a new file that includes the `common` module if you wish to use t
 macro or add any common test code. This project uses `cargo-llvm-cov`, and expects a coverage
 of at least 80%.
 
+You can know how much coverage you accomplished by running `make test-coverage-get`,
+which will print the percentage directly.
+
 ## Running The Tests
 
-This project uses make for some command recipes. You can run `make test_code` and it will
+This project uses make for some command recipes. You can run `make test-code` and it will
 test the application using the correct parameters.
 
 It is not recommended to rely on `cargo test` because parameters may change depending
