@@ -243,7 +243,7 @@ For more information read the [license file][license].
 [docs-badge]: https://badges.ws/crates/docs/actix_failwrap
 [downloads-badge]: https://badges.ws/crates/dt/actix_failwrap
 [codecov-badge]: https://img.shields.io/codecov/c/github/FlakySL/actix_failwrap
-[tests-badge]: https://github.com/FlakySL/actix_failwrap/actions/workflows/020-tests.yml/badge.svg
+[tests-badge]: https://github.com/FlakySL/actix_failwrap/actions/workflows/010-tests.yml/badge.svg
 [discord-badge]: https://badges.ws/discord/online/1344769456731197450
 
 <!-- Badge targets -->
