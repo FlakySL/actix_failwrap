@@ -83,9 +83,9 @@ jobs:
           # If the last published tag is minor than the crate's tag
           # determine that the crate should be published.
           if semver -r "> $last_tag" "$crate_version"; then
-            echo "should_publish='true'" >> $GITHUB_OUTPUT
+            echo "should_publish=true" >> $GITHUB_OUTPUT
           else
-            echo "should_publish='false'" >> $GITHUB_OUTPUT
+            echo "should_publish=false" >> $GITHUB_OUTPUT
           fi
 
           # If there is no release associated to the last tag
