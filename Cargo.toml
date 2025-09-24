@@ -4,7 +4,7 @@ description = "A micro-package that enables ergonomic error propagation (using t
 repository = "https://github.com/FlakySL/actix_failwrap"
 license = "GPL-3.0"
 readme = "./README.md"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2024"
 authors = ["Esteve Autet <esteve@memw.es>", "Chiko <chiko@envs.net>"]
 keywords = [
@@ -28,7 +28,7 @@ syn = { version = "2.0.106", features = ["full", "extra-traits"] }
 actix-web = "4.11.0"
 chrono = "0.4.42"
 reqwest = "0.12.23"
-serde = { version = "1.0.219", features = ["derive"] }
+serde = { version = "1.0.226", features = ["derive"] }
 serde_json = "1.0.143"
 slab = "0.4.11" # version override for vulnerability
 thiserror = "2.0.12"
